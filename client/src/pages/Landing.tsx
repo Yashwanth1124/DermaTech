@@ -79,10 +79,10 @@ export default function Landing() {
               size="lg" 
               className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
               onClick={handleQuickLogin}
-              disabled={isLoginLoading || isRegisterLoading}
+              disabled={isLoading}
             >
               <Smartphone className="mr-2 h-5 w-5" />
-              {isLoginLoading || isRegisterLoading ? "Loading..." : "Launch DermaTech"}
+              {isLoading ? "Loading..." : "Launch DermaTech"}
             </Button>
             <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
               <Eye className="mr-2 h-5 w-5" />
@@ -236,10 +236,10 @@ export default function Landing() {
               variant="secondary"
               className="px-8 py-4 text-lg font-semibold"
               onClick={handleQuickLogin}
-              disabled={isLoginLoading || isRegisterLoading}
+              disabled={isLoading}
             >
               <Heart className="mr-2 h-5 w-5" />
-              {isLoginLoading || isRegisterLoading ? "Loading..." : "Start Your Health Journey"}
+              {isLoading ? "Loading..." : "Start Your Health Journey"}
             </Button>
             <Button 
               size="lg" 
