@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,16 +17,21 @@ import {
   Heart
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 
 export default function Landing() {
-  const { login, register, isLoginLoading, isRegisterLoading } = useAuth();
+  const { login, register } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [, setLocation] = useLocation();
 
   const handleQuickLogin = async () => {
+    setIsLoading(true);
     try {
       await login({
         email: "demo@dermatech.com",
         password: "demo123"
       });
+      setLocation("/");
     } catch (error) {
       // If demo user doesn't exist, create it
       try {
@@ -37,9 +43,12 @@ export default function Landing() {
           username: "demo",
           role: "patient"
         });
+        setLocation("/");
       } catch (regError) {
         console.error("Demo login failed:", regError);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -20,23 +20,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes for DermaTech
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const userData = insertUserSchema.parse(req.body);
+      const { email, password, firstName, lastName, username, role = "patient" } = req.body;
       
-      if (!userData.password) {
-        return res.status(400).json({ message: "Password is required" });
+      if (!email || !password || !firstName || !lastName || !username) {
+        return res.status(400).json({ message: "All fields are required" });
       }
 
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       const user = await storage.upsertUser({
-        ...userData,
-        id: userData.id || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: userId,
+        email,
+        firstName,
+        lastName,
+        username,
+        role,
         password: hashedPassword,
       });
 
       const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET);
       
-      const { password, ...userWithoutPassword } = user;
+      const { password: _, ...userWithoutPassword } = user;
       res.status(201).json({ user: userWithoutPassword, token });
     } catch (error) {
       console.error("Registration error:", error);
@@ -72,7 +77,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/auth/me", async (req, res) => {
+  app.get("/api/auth/user", async (req, res) => {
     try {
       const token = req.headers.authorization?.replace("Bearer ", "");
       if (!token) {
@@ -91,6 +96,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(401).json({ message: "Unauthorized" });
     }
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    res.json({ message: "Logged out successfully" });
   });
 
   // Dashboard stats with comprehensive metrics

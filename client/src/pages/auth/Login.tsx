@@ -1,131 +1,295 @@
-import { useState } from 'react';
-import { Link, useLocation } from 'wouter';
-import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Microscope } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Heart, User, Stethoscope, Shield } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loginForm, setLoginForm] = useState({
+    email: "",
+    password: ""
+  });
+  const [registerForm, setRegisterForm] = useState({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    username: "",
+    role: "patient"
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-
-    const result = await login(formData.email, formData.password);
     
-    if (result.success) {
+    try {
+      await login(loginForm);
       toast({
-        title: "Welcome back!",
-        description: "You have been successfully logged in.",
+        title: "Login Successful",
+        description: "Welcome to DermaTech!",
       });
-      setLocation('/');
-    } else {
-      setError(result.message || 'Login failed');
+      setLocation("/");
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      await register(registerForm);
+      toast({
+        title: "Registration Successful",
+        description: "Welcome to DermaTech!",
+      });
+      setLocation("/");
+    } catch (error: any) {
+      toast({
+        title: "Registration Failed",
+        description: error.message || "Failed to create account",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    try {
+      await login({
+        email: "demo@dermatech.com",
+        password: "demo123"
+      });
+      toast({
+        title: "Demo Access Granted",
+        description: "Exploring DermaTech features",
+      });
+      setLocation("/");
+    } catch (error) {
+      // If demo user doesn't exist, create it
+      try {
+        await register({
+          email: "demo@dermatech.com",
+          password: "demo123",
+          firstName: "Demo",
+          lastName: "Patient",
+          username: "demo_patient",
+          role: "patient"
+        });
+        toast({
+          title: "Demo Account Created",
+          description: "Welcome to DermaTech!",
+        });
+        setLocation("/");
+      } catch (regError: any) {
+        toast({
+          title: "Demo Access Failed",
+          description: "Please try manual login",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full flex items-center justify-center">
-              <Microscope className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-6">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center">
+              <Heart className="h-6 w-6 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to DermaTech</CardTitle>
-          <CardDescription>
-            Sign in to access your healthcare dashboard
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <h1 className="text-2xl font-bold text-gray-900">DermaTech</h1>
+          <p className="text-gray-600">Advanced Healthcare Platform</p>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign In'}
+        {/* Demo Access Alert */}
+        <Alert className="mb-6 border-blue-200 bg-blue-50">
+          <AlertDescription className="text-center">
+            <Button
+              onClick={handleDemoLogin}
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+            >
+              {isLoading ? "Accessing..." : "🚀 Try Demo Access"}
             </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-slate-600">
-              Don't have an account?{' '}
-              <Link href="/register" className="text-blue-600 hover:underline">
-                Sign up here
-              </Link>
+            <p className="text-xs text-blue-700 mt-2">
+              Experience all DermaTech features instantly
             </p>
-          </div>
-        </CardContent>
-      </Card>
+          </AlertDescription>
+        </Alert>
+
+        <Tabs defaultValue="login" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login">Sign In</TabsTrigger>
+            <TabsTrigger value="register">Sign Up</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="login">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sign In</CardTitle>
+                <CardDescription>
+                  Access your DermaTech healthcare dashboard
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email">Email</Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={loginForm.email}
+                      onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password">Password</Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={loginForm.password}
+                      onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Signing In..." : "Sign In"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="register">
+            <Card>
+              <CardHeader>
+                <CardTitle>Create Account</CardTitle>
+                <CardDescription>
+                  Join DermaTech for advanced healthcare services
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        placeholder="First name"
+                        value={registerForm.firstName}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        placeholder="Last name"
+                        value={registerForm.lastName}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      placeholder="Choose a username"
+                      value={registerForm.username}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-email">Email</Label>
+                    <Input
+                      id="register-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={registerForm.email}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-password">Password</Label>
+                    <Input
+                      id="register-password"
+                      type="password"
+                      placeholder="Create a password"
+                      value={registerForm.password}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Account Type</Label>
+                    <select
+                      id="role"
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      value={registerForm.role}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, role: e.target.value }))}
+                    >
+                      <option value="patient">
+                        <User className="inline mr-2" /> Patient
+                      </option>
+                      <option value="doctor">
+                        <Stethoscope className="inline mr-2" /> Healthcare Provider
+                      </option>
+                      <option value="admin">
+                        <Shield className="inline mr-2" /> Administrator
+                      </option>
+                    </select>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Creating Account..." : "Create Account"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Footer */}
+        <div className="text-center mt-6 text-sm text-gray-600">
+          <p>
+            By signing in, you agree to our{" "}
+            <span className="text-blue-600 cursor-pointer hover:underline">Terms of Service</span>
+            {" "}and{" "}
+            <span className="text-blue-600 cursor-pointer hover:underline">Privacy Policy</span>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

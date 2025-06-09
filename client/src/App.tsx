@@ -28,6 +28,17 @@ import Profile from "@/pages/profile/Profile";
 import Support from "@/pages/support/Support";
 
 function Router() {
+  return (
+    <Switch>
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
+      <Route path="/" component={AuthWrapper} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+function AuthWrapper() {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
@@ -44,14 +55,7 @@ function Router() {
   }
 
   if (!isAuthenticated) {
-    return (
-      <Switch>
-        <Route path="/register" component={Register} />
-        <Route path="/login" component={Login} />
-        <Route path="/" component={() => <Landing />} />
-        <Route component={() => <Landing />} />
-      </Switch>
-    );
+    return <Landing />;
   }
 
   const getDashboardComponent = () => {
