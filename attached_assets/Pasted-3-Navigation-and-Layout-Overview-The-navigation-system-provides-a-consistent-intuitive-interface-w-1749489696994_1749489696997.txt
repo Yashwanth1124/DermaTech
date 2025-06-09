@@ -1,0 +1,33 @@
+3. Navigation and Layout
+Overview
+The navigation system provides a consistent, intuitive interface with a collapsible sidebar and top bar, enabling seamless access to dashboards, profiles, and features. It supports offline navigation and 15 Indian languages, outperforming Eka Care’s likely simpler navigation.
+
+UI Components
+Sidebar (Left Navigation):
+Logo: A clickable DermaTech logo (blue gradient, modern font) redirecting to the home dashboard.
+Dashboard Link: A “Home” item with a house icon, loading the main dashboard.
+Profile Link: A “Profile” item with a user icon, opening settings (name, contact, ABHA ID, password).
+Appointments Link: A “Appointments” item with a calendar icon, showing booking/queue screens.
+PHR Link (Patients): A “Health Records” item with a medical chart icon, accessing PHR features.
+EMR Link (Doctors): An “EMR” item with a stethoscope icon, opening prescription/queue screens.
+Pharmacy Link: A “Pharmacy” item with a pill icon, navigating to the marketplace.
+AR/VR Consults Link: An “AR/VR Consults” item with a VR headset icon, for visualizations/consultations.
+Analytics Link (Doctors/Hospitals): An “Analytics” item with a graph icon, showing blockchain trends.
+Help & Support Link: A “Help” item with a question mark icon, opening support options.
+Logout Button: A red bottom-aligned button, clearing session data.
+Language Dropdown: A bottom dropdown with 15 Indian languages, showing the selected language’s flag.
+Top Bar:
+Search Bar: A text input with a magnifying glass icon, searching patients, prescriptions, or pharmacies.
+Notification Icon: A bell icon with a badge for unread notifications (e.g., appointment reminders).
+Language Dropdown: A duplicate of the sidebar’s language selector for quick access.
+Profile Avatar: A circular avatar with user initials, opening a dropdown with “Profile,” “Settings,” and “Logout.”
+Functionality
+Sidebar:
+Collapses into a hamburger menu on mobile, expanding with a tap.
+Highlights active items with a blue background and bold text.
+Caches navigation state offline, graying out online-only features (e.g., AR/VR) with a tooltip.
+Language changes update the UI instantly, persisting across sessions.
+Top Bar:
+Search provides autocomplete suggestions (e.g., patient names, drug names) in <0.3 seconds.
+Notifications show a dropdown with recent updates (e.g., “Order Shipped”), with a “Mark All Read” button.
+Profile dropdown allows toggling light/dark mode and notification settings.
