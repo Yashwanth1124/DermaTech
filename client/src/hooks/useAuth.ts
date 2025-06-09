@@ -1,142 +1,64 @@
-import { useState, useEffect } from 'react';
-import { AuthState, User } from '@/types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { getAuthToken, setAuthToken, removeAuthToken } from "@/lib/authUtils";
 
 export function useAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    token: null,
-    isAuthenticated: false,
-    isLoading: true,
+  const queryClient = useQueryClient();
+  const token = getAuthToken();
+
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["auth", "user"],
+    queryFn: () => {
+      if (!token) return null;
+      return apiRequest("/api/auth/me");
+    },
+    retry: false,
+    enabled: !!token,
   });
 
-  useEffect(() => {
-    // Check for stored token on mount
-    const token = localStorage.getItem('dermatech_token');
-    if (token) {
-      fetchUser(token);
-    } else {
-      setAuthState(prev => ({ ...prev, isLoading: false }));
-    }
-  }, []);
-
-  const fetchUser = async (token: string) => {
-    try {
-      const response = await fetch('/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: { email: string; password: string }) => {
+      return apiRequest("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify(credentials),
       });
+    },
+    onSuccess: (data) => {
+      setAuthToken(data.token);
+      queryClient.setQueryData(["auth", "user"], data.user);
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
+    },
+  });
 
-      if (response.ok) {
-        const user = await response.json();
-        setAuthState({
-          user,
-          token,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-      } else {
-        localStorage.removeItem('dermatech_token');
-        setAuthState({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-          isLoading: false,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
-      localStorage.removeItem('dermatech_token');
-      setAuthState({
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    }
-  };
-
-  const login = async (email: string, password: string) => {
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (response.ok) {
-        const { user, token } = await response.json();
-        localStorage.setItem('dermatech_token', token);
-        setAuthState({
-          user,
-          token,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-        return { success: true };
-      } else {
-        const error = await response.json();
-        return { success: false, message: error.message };
-      }
-    } catch (error) {
-      return { success: false, message: 'Login failed' };
-    }
-  };
-
-  const register = async (userData: {
-    username: string;
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    phoneNumber?: string;
-    abhaId?: string;
-  }) => {
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+  const registerMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      return apiRequest("/api/auth/register", {
+        method: "POST",
         body: JSON.stringify(userData),
       });
-
-      if (response.ok) {
-        const { user, token } = await response.json();
-        localStorage.setItem('dermatech_token', token);
-        setAuthState({
-          user,
-          token,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-        return { success: true };
-      } else {
-        const error = await response.json();
-        return { success: false, message: error.message };
-      }
-    } catch (error) {
-      return { success: false, message: 'Registration failed' };
-    }
-  };
+    },
+    onSuccess: (data) => {
+      setAuthToken(data.token);
+      queryClient.setQueryData(["auth", "user"], data.user);
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
+    },
+  });
 
   const logout = () => {
-    localStorage.removeItem('dermatech_token');
-    setAuthState({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      isLoading: false,
-    });
+    removeAuthToken();
+    queryClient.setQueryData(["auth", "user"], null);
+    queryClient.removeQueries({ queryKey: ["auth"] });
+    window.location.href = "/";
   };
 
   return {
-    ...authState,
-    login,
-    register,
+    user,
+    isLoading,
+    isAuthenticated: !!user && !!token,
+    login: loginMutation.mutateAsync,
+    register: registerMutation.mutateAsync,
     logout,
+    isLoginLoading: loginMutation.isPending,
+    isRegisterLoading: registerMutation.isPending,
   };
 }
