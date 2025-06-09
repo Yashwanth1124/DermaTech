@@ -1,509 +1,849 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useState, useEffect, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Video, 
-  Headphones, 
+  Headset, 
   Calendar, 
+  Clock, 
   Users, 
-  Settings,
-  Camera,
   Mic,
   MicOff,
-  VideoOff,
+  Camera,
+  CameraOff,
+  PhoneCall,
   PhoneOff,
-  ScreenShare,
-  MessageSquare,
-  PenTool,
-  Save,
-  Clock,
-  Star
-} from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
+  Settings,
+  Monitor,
+  Smartphone,
+  Headphones,
+  Eye,
+  Hand,
+  Layers,
+  Globe,
+  Wifi,
+  Signal,
+  Play,
+  Square,
+  RotateCcw,
+  Maximize,
+  Volume2,
+  VolumeX
+} from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Telemedicine() {
   const { user } = useAuth();
+  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [isInSession, setIsInSession] = useState(false);
+  const [sessionControls, setSessionControls] = useState({
+    video: true,
+    audio: true,
+    vr: false,
+    ar: false
+  });
+  const [deviceCapabilities, setDeviceCapabilities] = useState({
+    webxr: false,
+    vr: false,
+    ar: false,
+    camera: false,
+    microphone: false
+  });
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const vrCanvasRef = useRef<HTMLCanvasElement>(null);
+  const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [inCall, setInCall] = useState(false);
-  const [callType, setCallType] = useState<'video' | 'arvr'>('video');
-  const [videoEnabled, setVideoEnabled] = useState(true);
-  const [audioEnabled, setAudioEnabled] = useState(true);
-  const [screenSharing, setScreenSharing] = useState(false);
-  const [arvrMode, setArvrMode] = useState<'ar' | 'vr'>('ar');
 
-  const { data: appointments = [] } = useQuery({
-    queryKey: ['/api/appointments'],
+  // Check device capabilities
+  useEffect(() => {
+    const checkCapabilities = async () => {
+      try {
+        // Check WebXR support
+        const webxrSupported = 'xr' in navigator;
+        let vrSupported = false;
+        let arSupported = false;
+
+        if (webxrSupported) {
+          try {
+            const vrSession = await (navigator as any).xr?.isSessionSupported('immersive-vr');
+            const arSession = await (navigator as any).xr?.isSessionSupported('immersive-ar');
+            vrSupported = vrSession;
+            arSupported = arSession;
+          } catch (error) {
+            console.log('WebXR session check failed:', error);
+          }
+        }
+
+        // Check media devices
+        let cameraSupported = false;
+        let microphoneSupported = false;
+
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          cameraSupported = devices.some(device => device.kind === 'videoinput');
+          microphoneSupported = devices.some(device => device.kind === 'audioinput');
+        } catch (error) {
+          console.log('Media device check failed:', error);
+        }
+
+        setDeviceCapabilities({
+          webxr: webxrSupported,
+          vr: vrSupported,
+          ar: arSupported,
+          camera: cameraSupported,
+          microphone: microphoneSupported
+        });
+      } catch (error) {
+        console.error('Failed to check device capabilities:', error);
+      }
+    };
+
+    checkCapabilities();
+  }, []);
+
+  // Fetch AR/VR sessions
+  const { data: sessions, isLoading } = useQuery({
+    queryKey: ["ar-vr-sessions"],
+    queryFn: () => apiRequest("/api/ar-vr-sessions"),
   });
 
-  const upcomingConsultations = appointments.filter((apt: any) => 
-    (apt.type === 'video' || apt.type === 'arvr') && 
-    new Date(apt.appointmentDate) > new Date()
-  );
+  // Fetch upcoming appointments
+  const { data: appointments } = useQuery({
+    queryKey: ["appointments"],
+    queryFn: () => apiRequest("/api/appointments"),
+  });
 
-  const startCall = (type: 'video' | 'arvr') => {
-    setCallType(type);
-    setInCall(true);
-    toast({
-      title: "Consultation Started",
-      description: `${type === 'arvr' ? 'AR/VR' : 'Video'} consultation is now active.`,
-    });
-  };
-
-  const endCall = () => {
-    setInCall(false);
-    setVideoEnabled(true);
-    setAudioEnabled(true);
-    setScreenSharing(false);
-    toast({
-      title: "Consultation Ended",
-      description: "The consultation has been ended successfully.",
-    });
-  };
-
-  const toggleVideo = () => {
-    setVideoEnabled(!videoEnabled);
-    toast({
-      title: videoEnabled ? "Camera Off" : "Camera On",
-      description: `Camera has been ${videoEnabled ? 'disabled' : 'enabled'}.`,
-    });
-  };
-
-  const toggleAudio = () => {
-    setAudioEnabled(!audioEnabled);
-    toast({
-      title: audioEnabled ? "Microphone Off" : "Microphone On",
-      description: `Microphone has been ${audioEnabled ? 'muted' : 'unmuted'}.`,
-    });
-  };
-
-  const toggleScreenShare = () => {
-    setScreenSharing(!screenSharing);
-    toast({
-      title: screenSharing ? "Screen Share Stopped" : "Screen Share Started",
-      description: `Screen sharing ${screenSharing ? 'stopped' : 'started'}.`,
-    });
-  };
-
-  // Mock consultation history
-  const consultationHistory = [
-    {
-      id: 1,
-      doctor: "Dr. Sarah Johnson",
-      date: "2024-01-15",
-      duration: "30 min",
-      type: "video",
-      rating: 5,
-      notes: "Follow-up for acne treatment. Improvement noted."
+  // Create AR/VR session mutation
+  const createSessionMutation = useMutation({
+    mutationFn: async (sessionData: any) => {
+      return apiRequest("/api/ar-vr-sessions", {
+        method: "POST",
+        body: JSON.stringify(sessionData),
+      });
     },
-    {
-      id: 2,
-      doctor: "Dr. Michael Chen",
-      date: "2024-01-10",
-      duration: "45 min",
-      type: "arvr",
-      rating: 4,
-      notes: "3D skin analysis for suspicious mole. Biopsy recommended."
+    onSuccess: (data) => {
+      setSelectedSession(data);
+      queryClient.invalidateQueries({ queryKey: ["ar-vr-sessions"] });
+      toast({
+        title: "AR/VR Session Created",
+        description: "Your immersive consultation session is ready",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Session Creation Failed",
+        description: "Failed to create AR/VR session. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const startVRSession = async () => {
+    try {
+      if (!deviceCapabilities.vr) {
+        toast({
+          title: "VR Not Supported",
+          description: "Your device doesn't support VR capabilities",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Initialize VR session
+      const vrSession = await (navigator as any).xr.requestSession('immersive-vr', {
+        requiredFeatures: ['local-floor'],
+        optionalFeatures: ['hand-tracking', 'eye-tracking']
+      });
+
+      setIsInSession(true);
+      setSessionControls(prev => ({ ...prev, vr: true }));
+      
+      toast({
+        title: "VR Session Started",
+        description: "Immersive VR consultation is now active",
+      });
+    } catch (error) {
+      console.error('VR session failed:', error);
+      toast({
+        title: "VR Session Failed",
+        description: "Could not start VR session. Check your headset connection.",
+        variant: "destructive",
+      });
     }
-  ];
+  };
+
+  const startARSession = async () => {
+    try {
+      if (!deviceCapabilities.ar) {
+        toast({
+          title: "AR Not Supported",
+          description: "Your device doesn't support AR capabilities",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Initialize AR session
+      const arSession = await (navigator as any).xr.requestSession('immersive-ar', {
+        requiredFeatures: ['local-floor'],
+        optionalFeatures: ['hit-test', 'light-estimation']
+      });
+
+      setIsInSession(true);
+      setSessionControls(prev => ({ ...prev, ar: true }));
+      
+      toast({
+        title: "AR Session Started",
+        description: "Augmented reality consultation is now active",
+      });
+    } catch (error) {
+      console.error('AR session failed:', error);
+      toast({
+        title: "AR Session Failed",
+        description: "Could not start AR session. Check camera permissions.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const startVideoCall = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: sessionControls.video,
+        audio: sessionControls.audio
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+
+      setIsInSession(true);
+      
+      toast({
+        title: "Video Call Started",
+        description: "Traditional video consultation is now active",
+      });
+    } catch (error) {
+      console.error('Video call failed:', error);
+      toast({
+        title: "Video Call Failed",
+        description: "Could not access camera/microphone. Check permissions.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const endSession = () => {
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+
+    setIsInSession(false);
+    setSessionControls({
+      video: true,
+      audio: true,
+      vr: false,
+      ar: false
+    });
+
+    toast({
+      title: "Session Ended",
+      description: "Consultation session has been terminated",
+    });
+  };
+
+  const toggleControl = (control: keyof typeof sessionControls) => {
+    setSessionControls(prev => ({
+      ...prev,
+      [control]: !prev[control]
+    }));
+  };
+
+  const createNewSession = async (type: string, appointmentId?: number) => {
+    const sessionData = {
+      appointmentId,
+      patientId: user?.id,
+      doctorId: "doctor_123", // Would be from appointment data
+      sessionType: type,
+      status: "scheduled"
+    };
+
+    await createSessionMutation.mutateAsync(sessionData);
+  };
+
+  const upcomingArVrAppointments = appointments?.filter((apt: any) => 
+    apt.consultationType === "ar_vr" || apt.type === "ar_vr"
+  ) || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">AR/VR Consultations</h1>
-          <p className="text-slate-600 mt-1">
-            Immersive teleconsultations with 4K quality and real-time collaboration
+          <h1 className="text-3xl font-bold text-gray-900">AR/VR Telemedicine</h1>
+          <p className="text-gray-600 mt-1">
+            Immersive healthcare consultations with A-Frame + WebXR technology
           </p>
         </div>
-        <div className="mt-4 md:mt-0 flex items-center space-x-2">
-          <Badge className="bg-purple-100 text-purple-800">
-            <Headphones className="w-3 h-3 mr-1" />
-            VR Ready
+        <div className="flex items-center space-x-4">
+          <Badge variant={deviceCapabilities.webxr ? "default" : "secondary"}>
+            <Headset className="mr-1 h-4 w-4" />
+            WebXR {deviceCapabilities.webxr ? "Ready" : "Not Available"}
           </Badge>
-          <Badge className="bg-blue-100 text-blue-800">
-            4K Quality
-          </Badge>
+          <Button
+            onClick={() => createNewSession("vr")}
+            disabled={!deviceCapabilities.vr || createSessionMutation.isPending}
+            className="bg-gradient-to-r from-purple-600 to-blue-600"
+          >
+            <Headset className="mr-2 h-4 w-4" />
+            Start VR Session
+          </Button>
         </div>
       </div>
 
-      {!inCall ? (
-        <Tabs defaultValue="schedule" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-            <TabsTrigger value="quick">Quick Consult</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-          </TabsList>
+      <Tabs defaultValue="consultation" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="consultation">Active Session</TabsTrigger>
+          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+          <TabsTrigger value="history">Session History</TabsTrigger>
+          <TabsTrigger value="settings">Device Setup</TabsTrigger>
+        </TabsList>
 
-          {/* Schedule Tab */}
-          <TabsContent value="schedule" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Upcoming Consultations</CardTitle>
-                <CardDescription>Your scheduled video and AR/VR consultations</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {upcomingConsultations.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Calendar className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                    <p className="text-slate-500">No upcoming consultations</p>
-                    <p className="text-sm text-slate-400 mt-2">Schedule your first telemedicine appointment</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {upcomingConsultations.map((consultation: any) => (
-                      <div key={consultation.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            {consultation.type === 'arvr' ? (
-                              <Headphones className="w-6 h-6 text-purple-600" />
-                            ) : (
-                              <Video className="w-6 h-6 text-blue-600" />
-                            )}
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-slate-900">
-                              {user?.role === 'patient' ? `Dr. ${consultation.doctorId}` : `Patient #${consultation.patientId}`}
-                            </h4>
-                            <div className="flex items-center text-sm text-slate-600 space-x-4">
-                              <span>{new Date(consultation.appointmentDate).toLocaleDateString()}</span>
-                              <span>{new Date(consultation.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                              <Badge variant="secondary" className="text-xs">
-                                {consultation.type === 'arvr' ? 'AR/VR' : 'Video'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button 
-                            onClick={() => startCall(consultation.type)}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <Video className="w-4 h-4 mr-2" />
-                            Join
-                          </Button>
-                          <Button variant="outline">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            Reschedule
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Quick Consult Tab */}
-          <TabsContent value="quick" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Video Consultation */}
-              <Card className="cursor-pointer hover:shadow-md transition-shadow">
+        <TabsContent value="consultation" className="space-y-6">
+          {isInSession ? (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Main Video/VR Display */}
+              <Card className="lg:col-span-3">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Video className="w-5 h-5 mr-2 text-blue-600" />
-                    Video Consultation
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      {sessionControls.vr && <Headset className="mr-2 h-5 w-5 text-purple-600" />}
+                      {sessionControls.ar && <Eye className="mr-2 h-5 w-5 text-blue-600" />}
+                      {!sessionControls.vr && !sessionControls.ar && <Video className="mr-2 h-5 w-5 text-green-600" />}
+                      {sessionControls.vr ? "VR Consultation" : sessionControls.ar ? "AR Consultation" : "Video Call"}
+                    </div>
+                    <Badge variant="default" className="bg-red-600">
+                      <Signal className="mr-1 h-3 w-3" />
+                      LIVE
+                    </Badge>
                   </CardTitle>
-                  <CardDescription>
-                    Traditional video call with screen sharing and annotations
-                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <h4 className="font-medium text-blue-900 mb-2">Features:</h4>
-                      <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• HD video quality</li>
-                        <li>• Screen sharing</li>
-                        <li>• Real-time annotations</li>
-                        <li>• Recording capability</li>
-                      </ul>
-                    </div>
-                    <Button 
-                      onClick={() => startCall('video')} 
-                      className="w-full"
-                    >
-                      <Video className="w-4 h-4 mr-2" />
-                      Start Video Call
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* AR/VR Consultation */}
-              <Card className="cursor-pointer hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Headphones className="w-5 h-5 mr-2 text-purple-600" />
-                    AR/VR Consultation
-                  </CardTitle>
-                  <CardDescription>
-                    Immersive 3D consultation with spatial interaction
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="bg-purple-50 rounded-lg p-4">
-                      <h4 className="font-medium text-purple-900 mb-2">Features:</h4>
-                      <ul className="text-sm text-purple-700 space-y-1">
-                        <li>• 3D skin visualization</li>
-                        <li>• Spatial annotations</li>
-                        <li>• Virtual tools</li>
-                        <li>• Immersive experience</li>
-                      </ul>
-                    </div>
-                    <Select value={arvrMode} onValueChange={(value: 'ar' | 'vr') => setArvrMode(value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ar">AR Mode (Smartphone)</SelectItem>
-                        <SelectItem value="vr">VR Mode (Headset)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button 
-                      onClick={() => startCall('arvr')} 
-                      className="w-full bg-purple-600 hover:bg-purple-700"
-                    >
-                      <Headphones className="w-4 h-4 mr-2" />
-                      Start AR/VR Session
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* System Requirements */}
-            <Card>
-              <CardHeader>
-                <CardTitle>System Requirements</CardTitle>
-                <CardDescription>Ensure optimal consultation experience</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-medium text-slate-900 mb-3">Video Consultation</h4>
-                    <ul className="text-sm text-slate-600 space-y-2">
-                      <li>• Stable internet connection (5 Mbps+)</li>
-                      <li>• Chrome, Firefox, or Safari browser</li>
-                      <li>• Working camera and microphone</li>
-                      <li>• Updated browser with WebRTC support</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-slate-900 mb-3">AR/VR Consultation</h4>
-                    <ul className="text-sm text-slate-600 space-y-2">
-                      <li>• High-speed internet (10 Mbps+)</li>
-                      <li>• WebXR compatible browser</li>
-                      <li>• VR headset or AR-enabled smartphone</li>
-                      <li>• Minimum 4GB RAM recommended</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* History Tab */}
-          <TabsContent value="history" className="space-y-4">
-            {consultationHistory.length === 0 ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center py-8">
-                    <Clock className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                    <p className="text-slate-500">No consultation history</p>
-                    <p className="text-sm text-slate-400 mt-2">Your past consultations will appear here</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {consultationHistory.map((session) => (
-                  <Card key={session.id}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4">
-                          <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                            {session.type === 'arvr' ? (
-                              <Headphones className="w-6 h-6 text-purple-600" />
-                            ) : (
-                              <Video className="w-6 h-6 text-blue-600" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <h4 className="font-medium text-slate-900">{session.doctor}</h4>
-                              <Badge variant="secondary" className="text-xs">
-                                {session.type === 'arvr' ? 'AR/VR' : 'Video'}
-                              </Badge>
-                              <div className="flex items-center">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star 
-                                    key={i}
-                                    className={`w-4 h-4 ${i < session.rating ? 'text-yellow-400 fill-current' : 'text-slate-300'}`}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                            <div className="flex items-center text-sm text-slate-600 space-x-4 mb-2">
-                              <span>{new Date(session.date).toLocaleDateString()}</span>
-                              <span>{session.duration}</span>
-                            </div>
-                            <p className="text-sm text-slate-600">{session.notes}</p>
+                  <div className="relative bg-black rounded-lg overflow-hidden" style={{ aspectRatio: "16/9" }}>
+                    {sessionControls.vr ? (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <canvas
+                          ref={vrCanvasRef}
+                          className="w-full h-full"
+                          style={{ background: "radial-gradient(circle, #1a1a2e, #16213e)" }}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center text-white">
+                            <Headset className="mx-auto h-16 w-16 mb-4 opacity-50" />
+                            <p className="text-lg font-semibold">VR Session Active</p>
+                            <p className="text-sm opacity-75">Put on your VR headset to join</p>
                           </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline">
-                            View Details
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            Download Report
-                          </Button>
+                      </div>
+                    ) : sessionControls.ar ? (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center text-white">
+                          <Eye className="mx-auto h-16 w-16 mb-4 opacity-50" />
+                          <p className="text-lg font-semibold">AR Session Active</p>
+                          <p className="text-sm opacity-75">Point your camera at the patient area</p>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      ) : (
-        /* In-Call Interface */
-        <Card className="h-[600px]">
-          <CardContent className="p-0 h-full">
-            <div className="relative h-full bg-slate-900 rounded-lg overflow-hidden">
-              {/* Video Feed Area */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                {callType === 'arvr' ? (
-                  <div className="text-center text-white">
-                    <Headphones className="w-24 h-24 mx-auto mb-4 opacity-50" />
-                    <h3 className="text-xl font-semibold mb-2">AR/VR Mode Active</h3>
-                    <p className="text-slate-300">
-                      {arvrMode === 'ar' ? 'AR visualization enabled' : 'VR environment loaded'}
-                    </p>
-                    {callType === 'arvr' && (
-                      <div className="mt-4 p-4 bg-black/30 rounded-lg">
-                        <p className="text-sm text-slate-300 mb-2">3D Controls:</p>
-                        <div className="flex justify-center space-x-4 text-xs">
-                          <span>Pinch: Zoom</span>
-                          <span>Swipe: Rotate</span>
-                          <span>Tap: Annotate</span>
-                        </div>
-                      </div>
+                    ) : (
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        muted
+                        className="w-full h-full object-cover"
+                      />
                     )}
-                  </div>
-                ) : (
-                  <div className="text-center text-white">
-                    <Video className="w-24 h-24 mx-auto mb-4 opacity-50" />
-                    <h3 className="text-xl font-semibold mb-2">Video Call Active</h3>
-                    <p className="text-slate-300">Connected in HD quality</p>
-                  </div>
-                )}
-              </div>
 
-              {/* Self Video (Picture-in-Picture) */}
-              <div className="absolute top-4 right-4 w-32 h-24 bg-slate-700 rounded-lg border-2 border-white/20">
-                <div className="w-full h-full flex items-center justify-center">
-                  {videoEnabled ? (
-                    <Camera className="w-8 h-8 text-white/60" />
-                  ) : (
-                    <VideoOff className="w-8 h-8 text-red-400" />
+                    {/* Session Controls Overlay */}
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                      <div className="flex items-center space-x-3 bg-black/70 backdrop-blur-sm rounded-full px-6 py-3">
+                        <Button
+                          size="sm"
+                          variant={sessionControls.audio ? "default" : "secondary"}
+                          onClick={() => toggleControl("audio")}
+                          className="rounded-full w-10 h-10 p-0"
+                        >
+                          {sessionControls.audio ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={sessionControls.video ? "default" : "secondary"}
+                          onClick={() => toggleControl("video")}
+                          className="rounded-full w-10 h-10 p-0"
+                        >
+                          {sessionControls.video ? <Camera className="h-4 w-4" /> : <CameraOff className="h-4 w-4" />}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={endSession}
+                          className="rounded-full w-10 h-10 p-0"
+                        >
+                          <PhoneOff className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="rounded-full w-10 h-10 p-0"
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Session Info Panel */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Session Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Duration:</span>
+                      <span className="text-sm font-medium">15:32</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Quality:</span>
+                      <Badge variant="default" className="bg-green-600">HD</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Latency:</span>
+                      <span className="text-sm font-medium">45ms</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="font-medium">Participants</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-medium text-blue-600">DR</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Dr. Sarah Johnson</p>
+                          <p className="text-xs text-gray-600">Dermatologist</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-medium text-green-600">YOU</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
+                          <p className="text-xs text-gray-600">Patient</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {sessionControls.vr && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium">VR Features</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Hand Tracking</span>
+                          <Badge variant="default">Active</Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Eye Tracking</span>
+                          <Badge variant="secondary">Available</Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Spatial Audio</span>
+                          <Badge variant="default">Active</Badge>
+                        </div>
+                      </div>
+                    </div>
                   )}
-                </div>
-              </div>
-
-              {/* Call Info */}
-              <div className="absolute top-4 left-4 text-white">
-                <div className="bg-black/30 rounded-lg p-3">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <span className="text-sm font-medium">Connected</span>
-                  </div>
-                  <p className="text-xs text-slate-300">
-                    {callType === 'arvr' ? 'AR/VR Session' : 'Video Call'} • 15:42
-                  </p>
-                </div>
-              </div>
-
-              {/* Annotation Tools (AR/VR Mode) */}
-              {callType === 'arvr' && (
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                  <div className="bg-black/30 rounded-lg p-2 space-y-2">
-                    <Button size="sm" variant="ghost" className="text-white">
-                      <PenTool className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" className="text-white">
-                      <MessageSquare className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" className="text-white">
-                      <Save className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Call Controls */}
-              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-                <div className="flex items-center space-x-4 bg-black/50 rounded-full p-4">
-                  <Button
-                    size="sm"
-                    variant={audioEnabled ? "ghost" : "destructive"}
-                    className={`rounded-full w-12 h-12 ${audioEnabled ? 'text-white hover:bg-white/20' : ''}`}
-                    onClick={toggleAudio}
-                  >
-                    {audioEnabled ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-                  </Button>
-                  
-                  <Button
-                    size="sm"
-                    variant={videoEnabled ? "ghost" : "destructive"}
-                    className={`rounded-full w-12 h-12 ${videoEnabled ? 'text-white hover:bg-white/20' : ''}`}
-                    onClick={toggleVideo}
-                  >
-                    {videoEnabled ? <Camera className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
-                  </Button>
-                  
-                  {callType === 'video' && (
-                    <Button
-                      size="sm"
-                      variant={screenSharing ? "default" : "ghost"}
-                      className={`rounded-full w-12 h-12 ${!screenSharing ? 'text-white hover:bg-white/20' : ''}`}
-                      onClick={toggleScreenShare}
-                    >
-                      <ScreenShare className="w-5 h-5" />
-                    </Button>
-                  )}
-                  
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="rounded-full w-12 h-12 text-white hover:bg-white/20"
-                  >
-                    <MessageSquare className="w-5 h-5" />
-                  </Button>
-                  
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="rounded-full w-12 h-12"
-                    onClick={endCall}
-                  >
-                    <PhoneOff className="w-5 h-5" />
-                  </Button>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* VR Consultation Option */}
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Headset className="mr-2 h-6 w-6 text-purple-600" />
+                    Virtual Reality
+                  </CardTitle>
+                  <CardDescription>
+                    Immersive 3D consultation environment
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Layers className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm">3D anatomical models</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Hand className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm">Hand gesture control</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Eye className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm">Eye tracking support</span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={startVRSession}
+                    disabled={!deviceCapabilities.vr}
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                  >
+                    <Headset className="mr-2 h-4 w-4" />
+                    Start VR Session
+                  </Button>
+                  {!deviceCapabilities.vr && (
+                    <p className="text-xs text-gray-500 text-center">VR headset required</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* AR Consultation Option */}
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Eye className="mr-2 h-6 w-6 text-blue-600" />
+                    Augmented Reality
+                  </CardTitle>
+                  <CardDescription>
+                    Overlay digital information on real world
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Globe className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm">Real-world overlay</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Monitor className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm">Digital annotations</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Camera className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm">Camera-based tracking</span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={startARSession}
+                    disabled={!deviceCapabilities.ar}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    Start AR Session
+                  </Button>
+                  {!deviceCapabilities.ar && (
+                    <p className="text-xs text-gray-500 text-center">AR-capable device required</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Traditional Video Call */}
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Video className="mr-2 h-6 w-6 text-green-600" />
+                    Video Call
+                  </CardTitle>
+                  <CardDescription>
+                    Standard video consultation
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Camera className="h-4 w-4 text-green-600" />
+                      <span className="text-sm">HD video quality</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Mic className="h-4 w-4 text-green-600" />
+                      <span className="text-sm">Crystal clear audio</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Smartphone className="h-4 w-4 text-green-600" />
+                      <span className="text-sm">Multi-device support</span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={startVideoCall}
+                    disabled={!deviceCapabilities.camera}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    <Video className="mr-2 h-4 w-4" />
+                    Start Video Call
+                  </Button>
+                  {!deviceCapabilities.camera && (
+                    <p className="text-xs text-gray-500 text-center">Camera access required</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="upcoming" className="space-y-6">
+          {upcomingArVrAppointments.length > 0 ? (
+            <div className="space-y-4">
+              {upcomingArVrAppointments.map((appointment: any) => (
+                <Card key={appointment.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center">
+                          <Headset className="mr-2 h-5 w-5 text-purple-600" />
+                          AR/VR Consultation
+                        </CardTitle>
+                        <CardDescription>
+                          {new Date(appointment.dateTime).toLocaleDateString()} at{" "}
+                          {new Date(appointment.dateTime).toLocaleTimeString()}
+                        </CardDescription>
+                      </div>
+                      <Badge variant="outline">
+                        {appointment.duration} minutes
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">Duration: {appointment.duration} min</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">Dr. Sarah Johnson</span>
+                      </div>
+                    </div>
+                    <div className="flex space-x-3">
+                      <Button
+                        onClick={() => createNewSession("vr", appointment.id)}
+                        disabled={!deviceCapabilities.vr}
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        <Headset className="mr-2 h-4 w-4" />
+                        Join VR Session
+                      </Button>
+                      <Button
+                        onClick={() => createNewSession("ar", appointment.id)}
+                        disabled={!deviceCapabilities.ar}
+                        variant="outline"
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Join AR Session
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Calendar className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No upcoming AR/VR sessions</h3>
+                <p className="text-gray-600">Schedule an immersive consultation with your doctor</p>
+                <Button className="mt-4">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Schedule Session
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-6">
+          {sessions && sessions.length > 0 ? (
+            <div className="space-y-4">
+              {sessions.map((session: any) => (
+                <Card key={session.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center">
+                          {session.sessionType === "vr" && <Headset className="mr-2 h-5 w-5 text-purple-600" />}
+                          {session.sessionType === "ar" && <Eye className="mr-2 h-5 w-5 text-blue-600" />}
+                          {session.sessionType === "mixed_reality" && <Layers className="mr-2 h-5 w-5 text-indigo-600" />}
+                          {session.sessionType === "vr" ? "VR Session" : 
+                           session.sessionType === "ar" ? "AR Session" : "Mixed Reality Session"}
+                        </CardTitle>
+                        <CardDescription>
+                          {new Date(session.createdAt).toLocaleDateString()} • 
+                          {session.duration} minutes
+                        </CardDescription>
+                      </div>
+                      <Badge variant={session.status === "completed" ? "default" : "secondary"}>
+                        {session.status}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="text-sm text-gray-600">Session Quality</p>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="outline">HD Quality</Badge>
+                          <Badge variant="outline">Low Latency</Badge>
+                        </div>
+                      </div>
+                      <div className="space-x-2">
+                        <Button size="sm" variant="outline">
+                          <Play className="mr-1 h-3 w-3" />
+                          View Recording
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          Download Report
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Headset className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No session history</h3>
+                <p className="text-gray-600">Your completed AR/VR sessions will appear here</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Device Capabilities */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Device Capabilities</CardTitle>
+                <CardDescription>
+                  Check your device's AR/VR compatibility
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Globe className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm">WebXR Support</span>
+                    </div>
+                    <Badge variant={deviceCapabilities.webxr ? "default" : "secondary"}>
+                      {deviceCapabilities.webxr ? "Supported" : "Not Available"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Headset className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm">VR Headset</span>
+                    </div>
+                    <Badge variant={deviceCapabilities.vr ? "default" : "secondary"}>
+                      {deviceCapabilities.vr ? "Connected" : "Not Connected"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Eye className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm">AR Camera</span>
+                    </div>
+                    <Badge variant={deviceCapabilities.ar ? "default" : "secondary"}>
+                      {deviceCapabilities.ar ? "Available" : "Not Available"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Camera className="h-4 w-4 text-green-600" />
+                      <span className="text-sm">Camera Access</span>
+                    </div>
+                    <Badge variant={deviceCapabilities.camera ? "default" : "secondary"}>
+                      {deviceCapabilities.camera ? "Granted" : "Denied"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Mic className="h-4 w-4 text-orange-600" />
+                      <span className="text-sm">Microphone Access</span>
+                    </div>
+                    <Badge variant={deviceCapabilities.microphone ? "default" : "secondary"}>
+                      {deviceCapabilities.microphone ? "Granted" : "Denied"}
+                    </Badge>
+                  </div>
+                </div>
+
+                <Alert>
+                  <AlertDescription>
+                    For the best experience, ensure your VR headset is connected and permissions are granted for camera and microphone access.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+
+            {/* Setup Instructions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Setup Instructions</CardTitle>
+                <CardDescription>
+                  Get your device ready for AR/VR consultations
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">VR Setup</h4>
+                    <ol className="text-sm space-y-1 text-gray-600 list-decimal list-inside">
+                      <li>Connect your VR headset to your computer</li>
+                      <li>Install the latest VR runtime software</li>
+                      <li>Ensure proper room-scale tracking setup</li>
+                      <li>Test hand and eye tracking if available</li>
+                    </ol>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium mb-2">AR Setup</h4>
+                    <ol className="text-sm space-y-1 text-gray-600 list-decimal list-inside">
+                      <li>Grant camera access to your browser</li>
+                      <li>Ensure good lighting in your environment</li>
+                      <li>Clear the area for tracking space</li>
+                      <li>Test camera focus and positioning</li>
+                    </ol>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium mb-2">Audio/Video Setup</h4>
+                    <ol className="text-sm space-y-1 text-gray-600 list-decimal list-inside">
+                      <li>Test your microphone and speakers</li>
+                      <li>Check internet connection stability</li>
+                      <li>Close unnecessary applications</li>
+                      <li>Position camera at eye level</li>
+                    </ol>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
