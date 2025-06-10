@@ -20,7 +20,9 @@ import {
   CheckCircle,
   Globe,
   Award,
-  Zap
+  Zap,
+  Menu,
+  X
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -28,6 +30,7 @@ import { useLocation } from "wouter";
 export default function Landing() {
   const { login, register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, setLocation] = useLocation();
 
   const handleQuickLogin = async () => {
@@ -67,21 +70,100 @@ export default function Landing() {
               <div className="text-2xl font-bold text-blue-600">eka</div>
             </div>
             <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-600 hover:text-gray-900">Home</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">About</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">Services</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
+              <a href="#hero" className="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
+              <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
+              <a href="#stats" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
+              <a href="#contact" className="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
             </nav>
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">Sign In</Button>
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Get Started</Button>
+            <div className="md:hidden">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </div>
+            <div className="hidden md:flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setLocation("/auth/login")}
+              >
+                Sign In
+              </Button>
+              <Button 
+                size="sm" 
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={handleQuickLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? "Loading..." : "Get Started"}
+              </Button>
             </div>
           </div>
         </div>
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-lg border-b z-50">
+            <div className="px-4 py-6 space-y-4">
+              <a 
+                href="#hero" 
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Home
+              </a>
+              <a 
+                href="#features" 
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Features
+              </a>
+              <a 
+                href="#stats" 
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About
+              </a>
+              <a 
+                href="#contact" 
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </a>
+              <div className="pt-4 border-t space-y-3">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setLocation("/auth/login");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  onClick={() => {
+                    handleQuickLogin();
+                    setMobileMenuOpen(false);
+                  }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Loading..." : "Get Started"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
+      <section id="hero" className="relative bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -104,7 +186,15 @@ export default function Landing() {
                   <Download className="mr-2 h-5 w-5" />
                   {isLoading ? "Loading..." : "Get Started Free"}
                 </Button>
-                <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="px-8 py-4 text-lg"
+                  onClick={() => {
+                    const featuresSection = document.getElementById('features');
+                    featuresSection?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
                   <Play className="mr-2 h-5 w-5" />
                   Watch Demo
                 </Button>
@@ -130,8 +220,12 @@ export default function Landing() {
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">AI Health Assistant</h3>
                   <p className="text-gray-600 mb-4">Get instant health insights powered by advanced AI</p>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                    Try Now
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={handleQuickLogin}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Loading..." : "Try Now"}
                   </Button>
                 </div>
               </div>
@@ -141,7 +235,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white">
+      <section id="features" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -229,7 +323,7 @@ export default function Landing() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gray-50">
+      <section id="stats" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
