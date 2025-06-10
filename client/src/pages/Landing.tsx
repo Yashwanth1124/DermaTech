@@ -61,7 +61,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white scroll-smooth">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -247,7 +247,10 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
+              onClick={() => setLocation("/appointments")}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <Calendar className="h-6 w-6 text-blue-600" />
@@ -259,7 +262,10 @@ export default function Landing() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
+              onClick={() => setLocation("/records")}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <FileText className="h-6 w-6 text-green-600" />
@@ -271,7 +277,10 @@ export default function Landing() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
+              onClick={() => setLocation("/pharmacy")}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                   <Pill className="h-6 w-6 text-purple-600" />
@@ -283,19 +292,25 @@ export default function Landing() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
+              onClick={() => setLocation("/ai")}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
                   <Activity className="h-6 w-6 text-red-600" />
                 </div>
-                <CardTitle className="text-xl">Health Monitoring</CardTitle>
+                <CardTitle className="text-xl">AI Diagnostics</CardTitle>
                 <CardDescription>
-                  Track your vital signs and health metrics with smart monitoring tools.
+                  Get instant health insights with 97% accurate AI diagnostics.
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
+              onClick={() => setLocation("/profile")}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="h-6 w-6 text-yellow-600" />
@@ -307,14 +322,17 @@ export default function Landing() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
+              onClick={() => setLocation("/telemedicine")}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
                   <Smartphone className="h-6 w-6 text-indigo-600" />
                 </div>
-                <CardTitle className="text-xl">Mobile First</CardTitle>
+                <CardTitle className="text-xl">Telemedicine</CardTitle>
                 <CardDescription>
-                  Access healthcare services on-the-go with our mobile-optimized platform.
+                  Consult with doctors remotely using AR/VR technology.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -378,6 +396,7 @@ export default function Landing() {
               variant="outline" 
               size="lg" 
               className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg"
+              onClick={() => setLocation("/support")}
             >
               Contact Sales
             </Button>
@@ -386,7 +405,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
+      <footer id="contact" className="bg-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
@@ -398,10 +417,10 @@ export default function Landing() {
             <div>
               <h3 className="font-semibold mb-4">Products</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Health Records</a></li>
-                <li><a href="#" className="hover:text-white">Telemedicine</a></li>
-                <li><a href="#" className="hover:text-white">Pharmacy</a></li>
-                <li><a href="#" className="hover:text-white">AI Diagnostics</a></li>
+                <li><a href="#" className="hover:text-white cursor-pointer" onClick={() => setLocation("/records")}>Health Records</a></li>
+                <li><a href="#" className="hover:text-white cursor-pointer" onClick={() => setLocation("/telemedicine")}>Telemedicine</a></li>
+                <li><a href="#" className="hover:text-white cursor-pointer" onClick={() => setLocation("/pharmacy")}>Pharmacy</a></li>
+                <li><a href="#" className="hover:text-white cursor-pointer" onClick={() => setLocation("/ai")}>AI Diagnostics</a></li>
               </ul>
             </div>
             <div>
