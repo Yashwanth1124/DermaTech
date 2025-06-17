@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { apiRequest } from "@/lib/queryClient";
 
+// Placeholder imports for biometric and ABHA SDK integration
+// import { useWebAuthn } from "@/lib/webauthn";
+// import { useAbhaSdk } from "@/lib/abhaSdk";
+
 interface User {
   id: string;
   email: string;
@@ -10,10 +14,15 @@ interface User {
   username: string;
 }
 
-export function useAuth() {
+export function useAuthEnhanced() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Placeholder hooks for biometric and ABHA SDK
+  // const { authenticateWithBiometrics } = useWebAuthn();
+  // const { loginWithAbha } = useAbhaSdk();
 
   useEffect(() => {
     checkAuth();
@@ -45,6 +54,7 @@ export function useAuth() {
 
   const login = async (credentials: { email: string; password: string }) => {
     try {
+      setError(null);
       const response = await apiRequest("/api/auth/login", {
         method: "POST",
         body: JSON.stringify(credentials),
@@ -57,8 +67,51 @@ export function useAuth() {
       setUser(response.user);
       setIsAuthenticated(true);
       return response;
-    } catch (error) {
-      throw error;
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+      throw err;
+    }
+  };
+
+  const loginWithBiometrics = async () => {
+    try {
+      setError(null);
+      // Placeholder biometric authentication flow
+      // const credentials = await authenticateWithBiometrics();
+      // const response = await apiRequest("/api/auth/biometric-login", {
+      //   method: "POST",
+      //   body: JSON.stringify(credentials),
+      // });
+      // if (response.token) {
+      //   localStorage.setItem("auth_token", response.token);
+      // }
+      // setUser(response.user);
+      // setIsAuthenticated(true);
+      // return response;
+
+      throw new Error("Biometric login not implemented yet");
+    } catch (err: any) {
+      setError(err.message || "Biometric login failed");
+      throw err;
+    }
+  };
+
+  const loginWithAbha = async (abhaId: string) => {
+    try {
+      setError(null);
+      // Placeholder ABHA login flow
+      // const response = await loginWithAbha(abhaId);
+      // if (response.token) {
+      //   localStorage.setItem("auth_token", response.token);
+      // }
+      // setUser(response.user);
+      // setIsAuthenticated(true);
+      // return response;
+
+      throw new Error("ABHA login not implemented yet");
+    } catch (err: any) {
+      setError(err.message || "ABHA login failed");
+      throw err;
     }
   };
 
@@ -71,22 +124,22 @@ export function useAuth() {
     role: string;
   }) => {
     try {
+      setError(null);
       const response = await apiRequest("/api/auth/register", {
         method: "POST",
         body: JSON.stringify(userData),
       });
       
-      // Don't automatically log in after registration
-      // User should be redirected to login page instead
-      return { 
-        success: true, 
-        message: response.message || "Registration successful! Please log in with your credentials." 
-      };
-    } catch (error: any) {
-      return { 
-        success: false, 
-        message: error.message || "Registration failed" 
-      };
+      if (response.token) {
+        localStorage.setItem("auth_token", response.token);
+      }
+      
+      setUser(response.user);
+      setIsAuthenticated(true);
+      return response;
+    } catch (err: any) {
+      setError(err.message || "Registration failed");
+      throw err;
     }
   };
 
@@ -101,8 +154,8 @@ export function useAuth() {
           },
         });
       }
-    } catch (error) {
-      // Continue with logout even if API call fails
+    } catch {
+      // Continue logout even if API call fails
     } finally {
       localStorage.removeItem("auth_token");
       setUser(null);
@@ -114,7 +167,10 @@ export function useAuth() {
     user,
     isLoading,
     isAuthenticated,
+    error,
     login,
+    loginWithBiometrics,
+    loginWithAbha,
     register,
     logout,
   };

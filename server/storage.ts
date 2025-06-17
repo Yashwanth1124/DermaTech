@@ -39,8 +39,9 @@ import {
   type InsertTranslation,
   type PerformanceMetric,
 } from "@shared/schema";
-import { db } from "./db";
+import { pool } from "./db";
 import { eq, desc, and, or, like, count, sql } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/node-postgres";
 
 // Comprehensive storage interface for DermaTech
 export interface IStorage {
@@ -128,6 +129,8 @@ export interface IStorage {
   // Dashboard statistics
   getDashboardStats(userId: string, role: string): Promise<any>;
 }
+
+const db = drizzle(pool);
 
 export class DatabaseStorage implements IStorage {
   // User operations
@@ -529,7 +532,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAnalytics(userId?: string, eventType?: string): Promise<Analytics[]> {
-    let condition = sql`1=1`;
+    let condition: any = sql`1=1`;
     
     if (userId) {
       condition = eq(analytics.userId, userId);

@@ -16,7 +16,16 @@ import {
 
 const JWT_SECRET = process.env.JWT_SECRET || "dermatech-secret-key";
 
+import { registerOtpRoutes } from "./otpRoutes";
+import { registerBiometricRoutes } from "./biometricRoutes";
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Register OTP routes for 2FA
+  registerOtpRoutes(app);
+
+  // Register biometric routes
+  registerBiometricRoutes(app);
+
   // Auth routes for DermaTech
   app.post("/api/auth/register", async (req, res) => {
     try {
@@ -39,10 +48,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
       });
 
-      const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET);
-      
+      // Don't return token - user should log in separately
       const { password: _, ...userWithoutPassword } = user;
-      res.status(201).json({ user: userWithoutPassword, token });
+      res.status(201).json({ 
+        message: "Registration successful! Please log in with your credentials.",
+        user: userWithoutPassword 
+      });
     } catch (error) {
       console.error("Registration error:", error);
       res.status(400).json({ message: "Registration failed" });

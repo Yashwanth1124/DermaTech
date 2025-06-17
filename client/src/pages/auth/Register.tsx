@@ -48,14 +48,15 @@ export default function Register() {
     }
 
     const { confirmPassword, ...registrationData } = formData;
+    
     const result = await register(registrationData);
     
     if (result.success) {
       toast({
         title: "Registration successful!",
-        description: "Welcome to DermaTech. Your account has been created.",
+        description: "Your account has been created. Please log in with your credentials.",
       });
-      setLocation('/');
+      setLocation('/login');
     } else {
       setError(result.message || 'Registration failed');
     }

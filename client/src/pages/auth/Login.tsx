@@ -7,12 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, User, Stethoscope, Shield } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthEnhanced } from "@/hooks/useAuthEnhanced";
 import { useToast } from "@/hooks/use-toast";
+import { BiometricLoginButton } from "@/components/auth/BiometricLoginButton";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { login, register } = useAuth();
+  const { login, register } = useAuthEnhanced();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [loginForm, setLoginForm] = useState({
@@ -141,6 +142,8 @@ export default function Login() {
             </p>
           </AlertDescription>
         </Alert>
+
+        <BiometricLoginButton />
 
         <Tabs defaultValue="login" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
@@ -293,3 +296,10 @@ export default function Login() {
     </div>
   );
 }
+
+
+
+
+
+
+
