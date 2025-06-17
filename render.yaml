@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: dermatech-care
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: postgresql://neondb_owner:npg_7LwdQT1VPvFt@ep-delicate-hat-a8ytvxim-pooler.eastus2.azure.neon.tech/neondb?sslmode=require
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+    healthCheckPath: /health

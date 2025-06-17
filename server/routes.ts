@@ -20,6 +20,23 @@ import { registerOtpRoutes } from "./otpRoutes";
 import { registerBiometricRoutes } from "./biometricRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for Render
+  app.get("/", (req, res) => {
+    res.json({ 
+      status: "ok", 
+      message: "DermaTech Care API is running",
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  app.get("/health", (req, res) => {
+    res.json({ 
+      status: "healthy", 
+      service: "DermaTech Care",
+      timestamp: new Date().toISOString()
+    });
+  });
+
   // Register OTP routes for 2FA
   registerOtpRoutes(app);
 
