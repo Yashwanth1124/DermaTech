@@ -3,8 +3,11 @@ services:
     name: dermatech-care
     runtime: node
     plan: free
+    region: oregon  # or singapore, frankfurt, ohio
     buildCommand: npm ci && npm run build
     startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true  # Auto-deploy on git push
     envVars:
       - key: NODE_ENV
         value: production
@@ -14,4 +17,3 @@ services:
         generateValue: true
       - key: SESSION_SECRET
         generateValue: true
-    healthCheckPath: /health
