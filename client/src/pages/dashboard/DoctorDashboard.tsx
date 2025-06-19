@@ -9,7 +9,7 @@ import {
   RevenueCard,
   UrgentCasesCard,
   QuickActionsCard
-} from "@/components/dashboard/DoctorWidgets";
+} from "../../components/dashboard/DoctorWidgets";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 

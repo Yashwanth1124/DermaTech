@@ -141,3 +141,4 @@ DermaTech Care is a comprehensive dermatology platform that combines AI-powered 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+User priority: Fix authentication redirection immediately - values time and checkpoint efficiency.

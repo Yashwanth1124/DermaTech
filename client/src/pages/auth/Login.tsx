@@ -39,7 +39,8 @@ export default function Login() {
         title: "Login Successful",
         description: "Welcome to DermaTech!",
       });
-      // AuthWrapper will handle automatic redirection
+      // Force page reload to trigger proper auth check
+      window.location.href = "/";
     } catch (error: any) {
       toast({
         title: "Login Failed",
@@ -61,7 +62,8 @@ export default function Login() {
         title: "Registration Successful",
         description: "Welcome to DermaTech!",
       });
-      // AuthWrapper will handle automatic redirection
+      // Force page reload to trigger proper auth check
+      window.location.href = "/";
     } catch (error: any) {
       toast({
         title: "Registration Failed",
@@ -84,7 +86,8 @@ export default function Login() {
         title: "Demo Access Granted", 
         description: "Exploring DermaTech features",
       });
-      // AuthWrapper will handle automatic redirection
+      // Force page reload to trigger proper auth check
+      window.location.href = "/";
     } catch (error) {
       // If demo user doesn't exist, create it
       try {

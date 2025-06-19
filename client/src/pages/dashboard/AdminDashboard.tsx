@@ -11,7 +11,7 @@ import {
   RecentActivitiesCard,
   BlockchainMetricsCard,
   QuickActionsCard
-} from "@/components/dashboard/AdminWidgets";
+} from "../../components/dashboard/AdminWidgets";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
