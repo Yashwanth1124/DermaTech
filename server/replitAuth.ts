@@ -21,13 +21,19 @@ export async function setupAuth(app: Express) {
   // Demo login route - creates a demo user session
   app.get("/api/login", async (req, res) => {
     try {
-      // Create a demo user for testing
+      // Create a demo user for testing with hashed password
+      const bcrypt = await import('bcrypt');
+      const hashedPassword = await bcrypt.hash('demo123', 10);
+      
       const demoUser = await storage.upsertUser({
         id: "demo-user-123",
         email: "demo@dermatech.com",
         firstName: "Demo",
         lastName: "User",
         profileImageUrl: null,
+        password: hashedPassword,
+        username: "demo_user",
+        role: "patient"
       });
 
       // Set session

@@ -30,21 +30,10 @@ export function useAuthEnhanced() {
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
-
-      const userData = await apiRequest("/api/auth/user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const userData = await apiRequest("/api/auth/user");
       setUser(userData);
       setIsAuthenticated(true);
     } catch (error) {
-      localStorage.removeItem("auth_token");
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -59,10 +48,6 @@ export function useAuthEnhanced() {
         method: "POST",
         body: JSON.stringify(credentials),
       });
-      
-      if (response.token) {
-        localStorage.setItem("auth_token", response.token);
-      }
       
       setUser(response.user);
       setIsAuthenticated(true);
@@ -130,10 +115,6 @@ export function useAuthEnhanced() {
         body: JSON.stringify(userData),
       });
       
-      if (response.token) {
-        localStorage.setItem("auth_token", response.token);
-      }
-      
       setUser(response.user);
       setIsAuthenticated(true);
       return response;
@@ -145,19 +126,12 @@ export function useAuthEnhanced() {
 
   const logout = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
-      if (token) {
-        await apiRequest("/api/auth/logout", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      }
+      await apiRequest("/api/logout", {
+        method: "GET",
+      });
     } catch {
       // Continue logout even if API call fails
     } finally {
-      localStorage.removeItem("auth_token");
       setUser(null);
       setIsAuthenticated(false);
     }

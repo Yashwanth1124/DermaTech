@@ -124,6 +124,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "All fields are required" });
       }
 
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+
       const hashedPassword = await bcrypt.hash(password, 10);
       const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
@@ -137,10 +143,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
       });
 
-      // Don't return token - user should log in separately
+      // Create session for newly registered user
+      (req.session as any).user = user;
+
       const { password: _, ...userWithoutPassword } = user;
       res.status(201).json({ 
-        message: "Registration successful! Please log in with your credentials.",
         user: userWithoutPassword 
       });
     } catch (error) {
@@ -157,6 +164,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email and password are required" });
       }
 
+      // For demo purposes, check if it's the demo credentials and create/update user
+      if (email === "demo@dermatech.com" && password === "demo123") {
+        const hashedPassword = await bcrypt.hash("demo123", 10);
+        const demoUser = await storage.upsertUser({
+          id: "demo-user-123",
+          email: "demo@dermatech.com",
+          firstName: "Demo",
+          lastName: "User",
+          username: "demo_user",
+          role: "patient",
+          password: hashedPassword,
+        });
+
+        // Create session
+        (req.session as any).user = demoUser;
+        
+        const { password: _, ...userWithoutPassword } = demoUser;
+        return res.json({ user: userWithoutPassword });
+      }
+
       const user = await storage.getUserByEmail(email);
       if (!user || !user.password) {
         return res.status(401).json({ message: "Invalid credentials" });
@@ -167,10 +194,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET);
+      // Create session
+      (req.session as any).user = user;
       
       const { password: _, ...userWithoutPassword } = user;
-      res.json({ user: userWithoutPassword, token });
+      res.json({ user: userWithoutPassword });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
