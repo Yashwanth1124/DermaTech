@@ -32,7 +32,16 @@ function Router() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
-      <Route path="/:rest*" component={AuthWrapper} />
+      <Route path="/" component={AuthWrapper} />
+      <Route path="/profile" component={AuthWrapper} />
+      <Route path="/appointments" component={AuthWrapper} />
+      <Route path="/health-records" component={AuthWrapper} />
+      <Route path="/emr" component={AuthWrapper} />
+      <Route path="/ai-diagnostics" component={AuthWrapper} />
+      <Route path="/pharmacy" component={AuthWrapper} />
+      <Route path="/telemedicine" component={AuthWrapper} />
+      <Route path="/analytics" component={AuthWrapper} />
+      <Route path="/support" component={AuthWrapper} />
       <Route component={NotFound} />
     </Switch>
   );
