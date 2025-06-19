@@ -213,10 +213,25 @@ export default function AIDiagnostics() {
       </div>
 
       <Tabs defaultValue="analyze" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="analyze">New Analysis</TabsTrigger>
-          <TabsTrigger value="history">Diagnosis History</TabsTrigger>
-          <TabsTrigger value="insights">AI Insights</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
+          <TabsTrigger 
+            value="analyze" 
+            className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium transition-all"
+          >
+            New Analysis
+          </TabsTrigger>
+          <TabsTrigger 
+            value="history" 
+            className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium transition-all"
+          >
+            Diagnosis History
+          </TabsTrigger>
+          <TabsTrigger 
+            value="insights" 
+            className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium transition-all"
+          >
+            AI Insights
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="analyze" className="space-y-6">

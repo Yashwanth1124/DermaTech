@@ -372,3 +372,40 @@
 .lucide {
   flex-shrink: 0;
 }
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Enhanced tab styling */
+[data-radix-tabs-trigger] {
+  transition: all 0.2s ease-in-out;
+}
+
+[data-radix-tabs-trigger][data-state="active"] {
+  background: white !important;
+  color: #2563eb !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+  font-weight: 500 !important;
+}
+
+[data-radix-tabs-trigger]:not([data-state="active"]):hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: #374151;
+}

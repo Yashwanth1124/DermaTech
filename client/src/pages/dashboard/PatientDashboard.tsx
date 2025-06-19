@@ -74,11 +74,19 @@ export default function PatientDashboard() {
 
       {/* Main Dashboard Content */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="health">Health Tracking</TabsTrigger>
-          <TabsTrigger value="appointments">Appointments</TabsTrigger>
-          <TabsTrigger value="medications">Medications</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1 rounded-lg">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium transition-all">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="health" className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium transition-all">
+            Health Tracking
+          </TabsTrigger>
+          <TabsTrigger value="appointments" className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium transition-all">
+            Appointments
+          </TabsTrigger>
+          <TabsTrigger value="medications" className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium transition-all">
+            Medications
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
