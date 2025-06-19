@@ -161,74 +161,78 @@ export default function Profile() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Profile Settings</h1>
-          <p className="text-slate-600 mt-1">Manage your account settings and preferences</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Profile Settings</h1>
+          <p className="text-sm sm:text-base text-slate-600 mt-1">Manage your account settings and preferences</p>
         </div>
       </div>
 
       {/* Profile Overview */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row md:items-center md:space-x-6">
-            <div className="relative">
-              <Avatar className="w-24 h-24">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 lg:space-x-6">
+            <div className="relative self-center sm:self-start">
+              <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
                 <AvatarImage src={user?.profileImage} />
-                <AvatarFallback className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-2xl">
+                <AvatarFallback className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-lg sm:text-2xl">
                   {user ? getInitials(user.firstName, user.lastName) : 'U'}
                 </AvatarFallback>
               </Avatar>
               <Button
                 size="sm"
-                className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
+                className="absolute bottom-0 right-0 rounded-full w-6 h-6 sm:w-8 sm:h-8 p-0"
                 onClick={() => toast({ title: "Coming Soon", description: "Profile picture upload will be available soon." })}
               >
-                <Camera className="w-4 h-4" />
+                <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             </div>
-            <div className="mt-4 md:mt-0 flex-1">
-              <div className="flex items-center space-x-3 mb-2">
-                <h2 className="text-2xl font-bold text-slate-900">
+            <div className="mt-4 sm:mt-0 flex-1 text-center sm:text-left">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                   {user?.firstName} {user?.lastName}
                 </h2>
-                {user && getRoleBadge(user.role)}
-                {user?.isVerified && (
-                  <Badge className="bg-green-100 text-green-800">
-                    <Shield className="w-3 h-3 mr-1" />
-                    Verified
-                  </Badge>
-                )}
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                  {user && getRoleBadge(user.role)}
+                  {user?.isVerified && (
+                    <Badge className="bg-green-100 text-green-800">
+                      <Shield className="w-3 h-3 mr-1" />
+                      Verified
+                    </Badge>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-col space-y-1 text-slate-600">
-                <span className="flex items-center">
-                  <Mail className="w-4 h-4 mr-2" />
-                  {user?.email}
+              <div className="flex flex-col space-y-1 text-sm sm:text-base text-slate-600">
+                <span className="flex items-center justify-center sm:justify-start">
+                  <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">{user?.email}</span>
                 </span>
                 {user?.phoneNumber && (
-                  <span className="flex items-center">
-                    <Phone className="w-4 h-4 mr-2" />
-                    {user.phoneNumber}
+                  <span className="flex items-center justify-center sm:justify-start">
+                    <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span>{user.phoneNumber}</span>
                   </span>
                 )}
                 {user?.abhaId && (
-                  <span className="flex items-center">
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    ABHA ID: {user.abhaId}
+                  <span className="flex items-center justify-center sm:justify-start">
+                    <CreditCard className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">ABHA ID: {user.abhaId}</span>
                   </span>
                 )}
-                <span className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Member since {new Date(user?.createdAt || '').toLocaleDateString()}
+                <span className="flex items-center justify-center sm:justify-start">
+                  <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="text-xs sm:text-sm">Member since {new Date(user?.createdAt || '').toLocaleDateString()}</span>
                 </span>
               </div>
             </div>
-            <div className="mt-4 md:mt-0">
+            <div className="mt-4 sm:mt-0 flex justify-center sm:justify-start">
               <Button
                 onClick={() => setIsEditing(!isEditing)}
                 variant={isEditing ? "outline" : "default"}
+                size="sm"
+                className="w-full sm:w-auto"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 {isEditing ? 'Cancel' : 'Edit Profile'}
@@ -238,25 +242,27 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="personal" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="personal">Personal Info</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
-          <TabsTrigger value="privacy">Privacy</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="personal" className="space-y-4 sm:space-y-6">
+        <div className="overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 min-w-max sm:min-w-0">
+            <TabsTrigger value="personal" className="text-xs sm:text-sm px-2 sm:px-4">Personal Info</TabsTrigger>
+            <TabsTrigger value="security" className="text-xs sm:text-sm px-2 sm:px-4">Security</TabsTrigger>
+            <TabsTrigger value="preferences" className="text-xs sm:text-sm px-2 sm:px-4">Preferences</TabsTrigger>
+            <TabsTrigger value="privacy" className="text-xs sm:text-sm px-2 sm:px-4">Privacy</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Personal Information Tab */}
-        <TabsContent value="personal" className="space-y-6">
+        <TabsContent value="personal" className="space-y-4 sm:space-y-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>
+            <CardHeader className="px-4 sm:px-6">
+              <CardTitle className="text-lg sm:text-xl">Personal Information</CardTitle>
+              <CardDescription className="text-sm">
                 Update your personal details and contact information
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-4 px-4 sm:px-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
@@ -311,10 +317,11 @@ export default function Profile() {
               </div>
 
               {isEditing && (
-                <div className="flex space-x-3 pt-4">
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <Button 
                     onClick={handleSaveProfile}
                     disabled={updateProfileMutation.isPending}
+                    className="w-full sm:w-auto"
                   >
                     <Save className="w-4 h-4 mr-2" />
                     {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
@@ -322,6 +329,7 @@ export default function Profile() {
                   <Button 
                     variant="outline" 
                     onClick={() => setIsEditing(false)}
+                    className="w-full sm:w-auto"
                   >
                     Cancel
                   </Button>
