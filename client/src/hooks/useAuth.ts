@@ -21,7 +21,7 @@ export function useAuth() {
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("dermatech_token");
       if (!token) {
         setIsLoading(false);
         return;
@@ -35,7 +35,7 @@ export function useAuth() {
       setUser(userData);
       setIsAuthenticated(true);
     } catch (error) {
-      localStorage.removeItem("auth_token");
+      localStorage.removeItem("dermatech_token");
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -51,7 +51,7 @@ export function useAuth() {
       });
       
       if (response.token) {
-        localStorage.setItem("auth_token", response.token);
+        localStorage.setItem("dermatech_token", response.token);
       }
       
       setUser(response.user);
@@ -92,7 +92,7 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("dermatech_token");
       if (token) {
         await apiRequest("/api/auth/logout", {
           method: "POST",
@@ -104,7 +104,7 @@ export function useAuth() {
     } catch (error) {
       // Continue with logout even if API call fails
     } finally {
-      localStorage.removeItem("auth_token");
+      localStorage.removeItem("dermatech_token");
       setUser(null);
       setIsAuthenticated(false);
     }
