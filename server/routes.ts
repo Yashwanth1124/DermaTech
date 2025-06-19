@@ -18,10 +18,12 @@ const JWT_SECRET = process.env.JWT_SECRET || "dermatech-secret-key";
 
 import { registerOtpRoutes } from "./otpRoutes";
 import { registerBiometricRoutes } from "./biometricRoutes";
+import { aiSymptomChecker } from "./aiDiagnostics";
+import { suggestOptimalAppointmentTimes, getDoctorProfiles, sendAppointmentReminders } from "./appointmentService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Health check endpoint for Render
-  app.get("/", (req, res) => {
+  // Health check endpoint for Render - moved to /api/health to avoid conflicts with frontend
+  app.get("/api/health", (req, res) => {
     res.json({ 
       status: "ok", 
       message: "DermaTech Care API is running",
@@ -42,6 +44,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register biometric routes
   registerBiometricRoutes(app);
+
+  // AI Symptom Checker route
+  app.post("/api/ai-symptom-check", aiSymptomChecker);
+
+  // Appointment suggestions route
+  app.get("/api/appointments/suggestions", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token) return res.status(401).json({ message: "Unauthorized" });
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      const { preferences, urgency } = req.query;
+      const suggestions = await suggestOptimalAppointmentTimes(decoded.userId, preferences, urgency as string);
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Appointment suggestions error:", error);
+      res.status(500).json({ message: "Failed to get appointment suggestions" });
+    }
+  });
+
+  // Doctor profiles route
+  app.get("/api/doctors", async (req, res) => {
+    try {
+      const filters = req.query;
+      const doctors = await getDoctorProfiles(filters);
+      res.json(doctors);
+    } catch (error) {
+      console.error("Doctor profiles fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch doctor profiles" });
+    }
+  });
+
+  // Send appointment reminders route
+  app.post("/api/appointments/reminders/send", async (req, res) => {
+    try {
+      await sendAppointmentReminders();
+      res.json({ message: "Appointment reminders sent" });
+    } catch (error) {
+      console.error("Send appointment reminders error:", error);
+      res.status(500).json({ message: "Failed to send appointment reminders" });
+    }
+  });
 
   // Auth routes for DermaTech
   app.post("/api/auth/register", async (req, res) => {

@@ -26,16 +26,31 @@ export default function Appointments() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState<boolean>(false);
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+  const [selectedTime, setSelectedTime] = useState<Date | null>(null);
+  const [appointmentNotes, setAppointmentNotes] = useState<string>('');
+  const [doctorFilter, setDoctorFilter] = useState<string>('');
+  const [suggestedTimes, setSuggestedTimes] = useState<Date[]>([]);
+  const [urgency, setUrgency] = useState<string>('normal');
 
-  const { data: appointments = [], isLoading } = useQuery({
+  const { data: appointments = [], isLoading } = useQuery<any[]>({
     queryKey: ['/api/appointments'],
+  });
+
+  const { data: doctors = [] } = useQuery({
+    queryKey: ['doctors', doctorFilter],
+    queryFn: () => apiRequest(`/api/doctors?search=${doctorFilter}`),
   });
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (appointmentData: any) => {
-      return apiRequest('POST', '/api/appointments', appointmentData);
+      return apiRequest('/api/appointments', {
+        method: 'POST',
+        body: appointmentData,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
@@ -43,12 +58,19 @@ export default function Appointments() {
         title: "Success",
         description: "Appointment scheduled successfully.",
       });
+      setIsScheduleModalOpen(false);
+      setSelectedDoctor(null);
+      setSelectedTime(null);
+      setAppointmentNotes('');
     },
   });
 
   const updateAppointmentMutation = useMutation({
     mutationFn: async ({ id, ...data }: any) => {
-      return apiRequest('PATCH', `/api/appointments/${id}`, data);
+      return apiRequest(`/api/appointments/${id}`, {
+        method: 'PATCH',
+        body: data,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
@@ -58,6 +80,37 @@ export default function Appointments() {
       });
     },
   });
+
+  const fetchSuggestedTimes = async () => {
+    if (!selectedDoctor) return;
+    try {
+      const response = await apiRequest(`/api/appointments/suggestions?preferences=${JSON.stringify({ doctorId: selectedDoctor.id })}&urgency=${urgency}`);
+      setSuggestedTimes(response);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch suggested times.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleScheduleAppointment = () => {
+    if (!selectedDoctor || !selectedTime) {
+      toast({
+        title: "Error",
+        description: "Please select a doctor and time.",
+        variant: "destructive",
+      });
+      return;
+    }
+    createAppointmentMutation.mutate({
+      doctorId: selectedDoctor.id,
+      appointmentDate: selectedTime.toISOString(),
+      notes: appointmentNotes,
+      type: 'video',
+    });
+  };
 
   const filteredAppointments = appointments.filter((apt: any) => {
     const matchesSearch = apt.notes?.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -100,12 +153,105 @@ export default function Appointments() {
           <p className="text-slate-600 mt-1">Manage your healthcare appointments</p>
         </div>
         <div className="mt-4 md:mt-0">
-          <Button>
+          <Button onClick={() => setIsScheduleModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Schedule Appointment
           </Button>
         </div>
       </div>
+
+      {/* Schedule Appointment Modal */}
+      {isScheduleModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+            <h2 className="text-xl font-semibold mb-4">Schedule New Appointment</h2>
+            <div className="space-y-4">
+              <div>
+                <Label>Search Doctor</Label>
+                <Input
+                  placeholder="Search by name or specialty"
+                  value={doctorFilter}
+                  onChange={(e) => setDoctorFilter(e.target.value)}
+                />
+                <div className="max-h-40 overflow-y-auto border rounded mt-1">
+                  {doctors.length === 0 ? (
+                    <p className="p-2 text-sm text-gray-500">No doctors found</p>
+                  ) : (
+                    doctors.map((doc: any) => (
+                      <div
+                        key={doc.id}
+                        className={`p-2 cursor-pointer hover:bg-gray-100 ${selectedDoctor?.id === doc.id ? 'bg-blue-100' : ''}`}
+                        onClick={() => {
+                          setSelectedDoctor(doc);
+                          setSuggestedTimes([]);
+                          setSelectedTime(null);
+                        }}
+                      >
+                        <p className="font-semibold">{doc.name}</p>
+                        <p className="text-sm text-gray-600">{doc.qualifications}</p>
+                        <p className="text-sm text-gray-600">{doc.specialties.join(', ')}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {selectedDoctor && (
+                <div>
+                  <Label>Urgency</Label>
+                  <Select value={urgency} onValueChange={setUrgency}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button className="mt-2" onClick={fetchSuggestedTimes}>
+                    Fetch Suggested Times
+                  </Button>
+                </div>
+              )}
+
+              {suggestedTimes.length > 0 && (
+                <div>
+                  <Label>Select Time</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-1">
+                    {suggestedTimes.map((time) => (
+                      <Button
+                        key={time.toISOString()}
+                        variant={selectedTime?.toISOString() === time.toISOString() ? 'default' : 'outline'}
+                        onClick={() => setSelectedTime(time)}
+                      >
+                        {time.toLocaleString()}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <Label>Notes</Label>
+                <Input
+                  value={appointmentNotes}
+                  onChange={(e) => setAppointmentNotes(e.target.value)}
+                  placeholder="Additional notes"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsScheduleModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleScheduleAppointment}>
+                  Schedule
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <Card>
@@ -175,7 +321,7 @@ export default function Appointments() {
                     <div className="text-center py-8">
                       <CalendarIcon className="w-12 h-12 text-slate-400 mx-auto mb-4" />
                       <p className="text-slate-500">No upcoming appointments</p>
-                      <Button className="mt-4">
+                      <Button className="mt-4" onClick={() => setIsScheduleModalOpen(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Schedule your first appointment
                       </Button>
@@ -256,7 +402,7 @@ export default function Appointments() {
                     <CardContent className="pt-6">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-4">
-                          <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                             {getTypeIcon(appointment.type)}
                           </div>
                           <div className="flex-1">
@@ -281,22 +427,25 @@ export default function Appointments() {
                                 })}
                               </span>
                             </div>
-                            {appointment.diagnosis && (
-                              <p className="text-sm text-slate-600 mt-2">
-                                <strong>Diagnosis:</strong> {appointment.diagnosis}
-                              </p>
+                            {appointment.notes && (
+                              <p className="text-sm text-slate-600 mt-2">{appointment.notes}</p>
                             )}
                           </div>
                         </div>
                         <div className="flex space-x-2">
-                          <Button size="sm" variant="outline">
-                            View Details
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                            View
                           </Button>
-                          {appointment.status === 'completed' && (
-                            <Button size="sm" variant="outline">
-                              Download Report
-                            </Button>
-                          )}
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => updateAppointmentMutation.mutate({
+                              id: appointment.id,
+                              status: 'cancelled'
+                            })}
+                          >
+                            Cancel
+                          </Button>
                         </div>
                       </div>
                     </CardContent>

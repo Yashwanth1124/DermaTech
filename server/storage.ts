@@ -43,92 +43,95 @@ import { pool } from "./db";
 import { eq, desc, and, or, like, count, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 
-// Comprehensive storage interface for DermaTech
-export interface IStorage {
-  // User operations (ABHA Integration)
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  getUserByAbhaId(abhaId: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
-  updateUser(id: string, user: Partial<UpsertUser>): Promise<User | undefined>;
-  searchUsers(query: string, role?: string): Promise<User[]>;
-  updateUserOnlineStatus(id: string, isOnline: boolean): Promise<void>;
-  
-  // Pharmacy operations (2000+ partners)
-  getPharmacies(limit?: number, offset?: number): Promise<Pharmacy[]>;
-  getPharmacyById(id: number): Promise<Pharmacy | undefined>;
-  searchPharmacies(query: string, location?: any): Promise<Pharmacy[]>;
-  createPharmacy(pharmacy: InsertPharmacy): Promise<Pharmacy>;
-  updatePharmacy(id: number, pharmacy: Partial<InsertPharmacy>): Promise<Pharmacy | undefined>;
-  
-  // Medication operations
-  getMedications(limit?: number, offset?: number): Promise<Medication[]>;
-  getMedicationById(id: number): Promise<Medication | undefined>;
-  searchMedications(query: string): Promise<Medication[]>;
-  createMedication(medication: InsertMedication): Promise<Medication>;
-  updateMedication(id: number, medication: Partial<InsertMedication>): Promise<Medication | undefined>;
-  
-  // Appointment operations (AR/VR Support)
-  getAppointments(userId: string, role: string): Promise<Appointment[]>;
-  getAppointmentById(id: number): Promise<Appointment | undefined>;
-  createAppointment(appointment: InsertAppointment): Promise<Appointment>;
-  updateAppointment(id: number, appointment: Partial<InsertAppointment>): Promise<Appointment | undefined>;
-  getUpcomingAppointments(userId: string): Promise<Appointment[]>;
-  
-  // Health record operations (PHR/EMR)
-  getHealthRecords(patientId: string): Promise<HealthRecord[]>;
-  getHealthRecordById(id: number): Promise<HealthRecord | undefined>;
-  createHealthRecord(record: InsertHealthRecord): Promise<HealthRecord>;
-  updateHealthRecord(id: number, record: Partial<InsertHealthRecord>): Promise<HealthRecord | undefined>;
-  shareHealthRecord(id: number, shareableLink: string): Promise<void>;
-  
-  // AI diagnosis operations (97% accuracy)
-  getAiDiagnoses(patientId: string): Promise<AiDiagnosis[]>;
-  getAiDiagnosisById(id: number): Promise<AiDiagnosis | undefined>;
-  createAiDiagnosis(diagnosis: InsertAiDiagnosis): Promise<AiDiagnosis>;
-  updateAiDiagnosis(id: number, diagnosis: Partial<InsertAiDiagnosis>): Promise<AiDiagnosis | undefined>;
-  validateAiDiagnosis(id: number, doctorId: string, isAccurate: boolean, notes?: string): Promise<void>;
-  
-  // Pharmacy order operations
-  getPharmacyOrders(patientId: string): Promise<PharmacyOrder[]>;
-  getPharmacyOrderById(id: number): Promise<PharmacyOrder | undefined>;
-  createPharmacyOrder(order: InsertPharmacyOrder): Promise<PharmacyOrder>;
-  updatePharmacyOrder(id: number, order: Partial<InsertPharmacyOrder>): Promise<PharmacyOrder | undefined>;
-  trackPharmacyOrder(orderNumber: string): Promise<PharmacyOrder | undefined>;
-  
-  // AR/VR session operations
-  getArVrSessions(userId: string): Promise<ArVrSession[]>;
-  getArVrSessionById(id: number): Promise<ArVrSession | undefined>;
-  createArVrSession(session: InsertArVrSession): Promise<ArVrSession>;
-  updateArVrSession(id: number, session: Partial<InsertArVrSession>): Promise<ArVrSession | undefined>;
-  
-  // Notification operations
-  getNotifications(userId: string): Promise<Notification[]>;
-  createNotification(notification: InsertNotification): Promise<Notification>;
-  markNotificationAsRead(id: number): Promise<void>;
-  markAllNotificationsAsRead(userId: string): Promise<void>;
-  
-  // Blockchain operations
-  getBlockchainTransactions(userId: string): Promise<BlockchainTransaction[]>;
-  createBlockchainTransaction(transaction: InsertBlockchainTransaction): Promise<BlockchainTransaction>;
-  updateBlockchainTransaction(id: number, transaction: Partial<InsertBlockchainTransaction>): Promise<BlockchainTransaction | undefined>;
-  
-  // Analytics operations
-  createAnalyticsEvent(event: InsertAnalytics): Promise<Analytics>;
-  getAnalytics(userId?: string, eventType?: string): Promise<Analytics[]>;
-  
-  // Translation operations (15 Indian languages)
-  getTranslations(language: string): Promise<Translation[]>;
-  getTranslation(key: string, language: string): Promise<Translation | undefined>;
-  createTranslation(translation: InsertTranslation): Promise<Translation>;
-  
-  // Performance monitoring
-  recordPerformanceMetric(metric: Omit<PerformanceMetric, "id" | "timestamp">): Promise<void>;
-  
-  // Dashboard statistics
-  getDashboardStats(userId: string, role: string): Promise<any>;
-}
+  // Comprehensive storage interface for DermaTech
+  export interface IStorage {
+    // User operations (ABHA Integration)
+    getUser(id: string): Promise<User | undefined>;
+    getUserByUsername(username: string): Promise<User | undefined>;
+    getUserByEmail(email: string): Promise<User | undefined>;
+    getUserByAbhaId(abhaId: string): Promise<User | undefined>;
+    upsertUser(user: UpsertUser): Promise<User>;
+    updateUser(id: string, user: Partial<UpsertUser>): Promise<User | undefined>;
+    searchUsers(query: string, role?: string): Promise<User[]>;
+    updateUserOnlineStatus(id: string, isOnline: boolean): Promise<void>;
+    
+    // Pharmacy operations (2000+ partners)
+    getPharmacies(limit?: number, offset?: number): Promise<Pharmacy[]>;
+    getPharmacyById(id: number): Promise<Pharmacy | undefined>;
+    searchPharmacies(query: string, location?: any): Promise<Pharmacy[]>;
+    createPharmacy(pharmacy: InsertPharmacy): Promise<Pharmacy>;
+    updatePharmacy(id: number, pharmacy: Partial<InsertPharmacy>): Promise<Pharmacy | undefined>;
+    
+    // Medication operations
+    getMedications(limit?: number, offset?: number): Promise<Medication[]>;
+    getMedicationById(id: number): Promise<Medication | undefined>;
+    searchMedications(query: string): Promise<Medication[]>;
+    createMedication(medication: InsertMedication): Promise<Medication>;
+    updateMedication(id: number, medication: Partial<InsertMedication>): Promise<Medication | undefined>;
+    
+    // Appointment operations (AR/VR Support)
+    getAppointments(userId: string, role: string): Promise<Appointment[]>;
+    getAppointmentById(id: number): Promise<Appointment | undefined>;
+    createAppointment(appointment: InsertAppointment): Promise<Appointment>;
+    updateAppointment(id: number, appointment: Partial<InsertAppointment>): Promise<Appointment | undefined>;
+    getUpcomingAppointments(userId: string): Promise<Appointment[]>;
+    
+    // Health record operations (PHR/EMR)
+    getHealthRecords(patientId: string): Promise<HealthRecord[]>;
+    getHealthRecordById(id: number): Promise<HealthRecord | undefined>;
+    createHealthRecord(record: InsertHealthRecord): Promise<HealthRecord>;
+    updateHealthRecord(id: number, record: Partial<InsertHealthRecord>): Promise<HealthRecord | undefined>;
+    shareHealthRecord(id: number, shareableLink: string): Promise<void>;
+    
+    // AI diagnosis operations (97% accuracy)
+    getAiDiagnoses(patientId: string): Promise<AiDiagnosis[]>;
+    getAiDiagnosisById(id: number): Promise<AiDiagnosis | undefined>;
+    createAiDiagnosis(diagnosis: InsertAiDiagnosis): Promise<AiDiagnosis>;
+    updateAiDiagnosis(id: number, diagnosis: Partial<InsertAiDiagnosis>): Promise<AiDiagnosis | undefined>;
+    validateAiDiagnosis(id: number, doctorId: string, isAccurate: boolean, notes?: string): Promise<void>;
+
+    // Symptom check operations
+    saveSymptomCheck(data: any): Promise<void>;
+    
+    // Pharmacy order operations
+    getPharmacyOrders(patientId: string): Promise<PharmacyOrder[]>;
+    getPharmacyOrderById(id: number): Promise<PharmacyOrder | undefined>;
+    createPharmacyOrder(order: InsertPharmacyOrder): Promise<PharmacyOrder>;
+    updatePharmacyOrder(id: number, order: Partial<InsertPharmacyOrder>): Promise<PharmacyOrder | undefined>;
+    trackPharmacyOrder(orderNumber: string): Promise<PharmacyOrder | undefined>;
+    
+    // AR/VR session operations
+    getArVrSessions(userId: string): Promise<ArVrSession[]>;
+    getArVrSessionById(id: number): Promise<ArVrSession | undefined>;
+    createArVrSession(session: InsertArVrSession): Promise<ArVrSession>;
+    updateArVrSession(id: number, session: Partial<InsertArVrSession>): Promise<ArVrSession | undefined>;
+    
+    // Notification operations
+    getNotifications(userId: string): Promise<Notification[]>;
+    createNotification(notification: InsertNotification): Promise<Notification>;
+    markNotificationAsRead(id: number): Promise<void>;
+    markAllNotificationsAsRead(userId: string): Promise<void>;
+    
+    // Blockchain operations
+    getBlockchainTransactions(userId: string): Promise<BlockchainTransaction[]>;
+    createBlockchainTransaction(transaction: InsertBlockchainTransaction): Promise<BlockchainTransaction>;
+    updateBlockchainTransaction(id: number, transaction: Partial<InsertBlockchainTransaction>): Promise<BlockchainTransaction | undefined>;
+    
+    // Analytics operations
+    createAnalyticsEvent(event: InsertAnalytics): Promise<Analytics>;
+    getAnalytics(userId?: string, eventType?: string): Promise<Analytics[]>;
+    
+    // Translation operations (15 Indian languages)
+    getTranslations(language: string): Promise<Translation[]>;
+    getTranslation(key: string, language: string): Promise<Translation | undefined>;
+    createTranslation(translation: InsertTranslation): Promise<Translation>;
+    
+    // Performance monitoring
+    recordPerformanceMetric(metric: Omit<PerformanceMetric, "id" | "timestamp">): Promise<void>;
+    
+    // Dashboard statistics
+    getDashboardStats(userId: string, role: string): Promise<any>;
+  }
 
 const db = drizzle(pool);
 
@@ -407,6 +410,11 @@ export class DatabaseStorage implements IStorage {
         reviewedAt: new Date(),
       })
       .where(eq(aiDiagnoses.id, id));
+  }
+
+  // Symptom check operations
+  async saveSymptomCheck(data: any): Promise<void> {
+    await db.insert('symptomChecks').values(data);
   }
 
   // Pharmacy order operations
