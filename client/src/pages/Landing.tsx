@@ -69,31 +69,8 @@ export default function Landing() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleQuickLogin = async () => {
-    setIsLoading(true);
-    try {
-      await login({
-        email: "demo@dermatech.com",
-        password: "demo123"
-      });
-      setLocation("/");
-    } catch (error) {
-      try {
-        await register({
-          email: "demo@dermatech.com",
-          password: "demo123",
-          firstName: "Demo",
-          lastName: "User",
-          username: "demo",
-          role: "patient"
-        });
-        setLocation("/");
-      } catch (regError) {
-        console.error("Demo login failed:", regError);
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  const handleOAuthLogin = () => {
+    window.location.href = "/api/login";
   };
   
   const handleSkinDiagnosis = () => {
@@ -240,7 +217,7 @@ export default function Landing() {
                     variant="ghost" 
                     className="w-full justify-start"
                     onClick={() => {
-      setLocation("/login");
+                      handleOAuthLogin();
                       setMobileMenuOpen(false);
                     }}
                   >
@@ -249,10 +226,9 @@ export default function Landing() {
                   <Button 
                     className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
                     onClick={() => {
-                      window.location.href = "/api/login";
+                      handleOAuthLogin();
                       setMobileMenuOpen(false);
                     }}
-                    disabled={isLoading}
                   >
                     Sign In with Replit
                   </Button>
@@ -371,8 +347,7 @@ export default function Landing() {
                   <Button 
                     size="lg" 
                     className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 px-8 py-4 text-lg"
-                    onClick={() => window.location.href = "/api/login"}
-                    disabled={isLoading}
+                    onClick={handleOAuthLogin}
                   >
                     <Download className="mr-2 h-5 w-5" />
                     Sign In with Replit
@@ -1103,10 +1078,9 @@ export default function Landing() {
               <Button 
                 size="lg" 
                 className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg hover:scale-105 transition-transform"
-                onClick={handleQuickLogin}
-                disabled={isLoading}
+                onClick={handleOAuthLogin}
               >
-                {isLoading ? "Loading..." : "Try Web App Now"}
+                Try Web App Now
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button 
