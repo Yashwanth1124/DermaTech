@@ -69,10 +69,10 @@ export const pharmacies = pgTable("pharmacies", {
   address: jsonb("address").notNull(),
   location: jsonb("location"), // lat, lng for geolocation
   operatingHours: jsonb("operating_hours"), // Daily operating hours
-  deliveryRadius: real("delivery_radius").default(10), // In kilometers
+  deliveryRadius: real("delivery_radius").default(10.0), // In kilometers
   isVerified: boolean("is_verified").default(false),
   isActive: boolean("is_active").default(true),
-  rating: decimal("rating", { precision: 3, scale: 2 }).default(0),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   totalOrders: integer("total_orders").default(0),
   partneredDate: timestamp("partnered_date").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -108,7 +108,7 @@ export const pharmacyInventory = pgTable("pharmacy_inventory", {
   medicationId: integer("medication_id").references(() => medications.id).notNull(),
   stock: integer("stock").notNull().default(0),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  discount: decimal("discount", { precision: 5, scale: 2 }).default(0),
+  discount: decimal("discount", { precision: 5, scale: 2 }).default("0"),
   expiryDate: timestamp("expiry_date"),
   batchNumber: varchar("batch_number", { length: 50 }),
   isAvailable: boolean("is_available").default(true),
@@ -196,8 +196,8 @@ export const pharmacyOrders = pgTable("pharmacy_orders", {
   prescriptionId: integer("prescription_id").references(() => healthRecords.id),
   medications: jsonb("medications").notNull(), // Array of ordered medications
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
-  discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }).default(0),
-  deliveryCharges: decimal("delivery_charges", { precision: 10, scale: 2 }).default(0),
+  discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }).default("0"),
+  deliveryCharges: decimal("delivery_charges", { precision: 10, scale: 2 }).default("0"),
   finalAmount: decimal("final_amount", { precision: 10, scale: 2 }).notNull(),
   status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, confirmed, prepared, shipped, delivered, cancelled
   paymentStatus: varchar("payment_status", { length: 20 }).default("pending"),

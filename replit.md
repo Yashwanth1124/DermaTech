@@ -124,7 +124,11 @@ DermaTech Care is a comprehensive dermatology platform that combines AI-powered 
 
 ## Changelog
 
-- June 19, 2025. Initial setup
+- June 19, 2025: Migration to Replit environment completed
+  - Database connectivity established with Neon PostgreSQL
+  - All routing and navigation configured
+  - AI diagnostics page accessible at /ai-diagnostics
+- June 19, 2025: Initial setup
 
 ## User Preferences
 

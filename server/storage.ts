@@ -414,7 +414,14 @@ export class DatabaseStorage implements IStorage {
 
   // Symptom check operations
   async saveSymptomCheck(data: any): Promise<void> {
-    await db.insert('symptomChecks').values(data);
+    // Save symptom check data to analytics table for now
+    await db.insert(analytics).values({
+      userId: data.userId || 'anonymous',
+      eventType: 'symptom_check',
+      eventData: data,
+      userAgent: data.userAgent || '',
+      ipAddress: data.ipAddress || ''
+    });
   }
 
   // Pharmacy order operations
