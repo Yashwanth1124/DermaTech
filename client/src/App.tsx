@@ -32,7 +32,7 @@ function Router() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
-      <Route path="/" component={AuthWrapper} />
+      <Route path="/:rest*" component={AuthWrapper} />
       <Route component={NotFound} />
     </Switch>
   );
