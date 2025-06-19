@@ -25,7 +25,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Replit Auth first
   await setupAuth(app);
-  
+
   // Health check endpoint for Render - moved to /api/health to avoid conflicts with frontend
   app.get("/api/health", (req, res) => {
     res.json({ 
@@ -95,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       let user = await storage.getUser(userId);
-      
+
       // If user doesn't exist in database, create from OAuth claims
       if (!user) {
         const claims = req.user.claims;
@@ -107,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           profileImageUrl: claims.profile_image_url,
         });
       }
-      
+
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -119,7 +119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/register", async (req, res) => {
     try {
       const { email, password, firstName, lastName, username, role = "patient" } = req.body;
-      
+
       if (!email || !password || !firstName || !lastName || !username) {
         return res.status(400).json({ message: "All fields are required" });
       }
@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const user = await storage.upsertUser({
         id: userId,
         email,
@@ -159,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      
+
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
       }
@@ -179,7 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Create session
         (req.session as any).user = demoUser;
-        
+
         const { password: _, ...userWithoutPassword } = demoUser;
         return res.json({ user: userWithoutPassword });
       }
@@ -196,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create session
       (req.session as any).user = user;
-      
+
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
@@ -215,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const decoded = jwt.verify(token, JWT_SECRET) as any;
       const user = await storage.getUser(decoded.userId);
-      
+
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
@@ -227,8 +227,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/logout", async (req, res) => {
-    res.json({ message: "Logged out successfully" });
+  // Logout endpoint
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Session destruction error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie('connect.sid'); // Clear session cookie
+      res.json({ message: "Logged out successfully" });
+    });
   });
 
   // Dashboard stats with comprehensive metrics
@@ -236,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
-      
+
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
@@ -256,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!q) {
         return res.status(400).json({ message: "Search query required" });
       }
-      
+
       const users = await storage.searchUsers(q as string, role as string);
       const usersWithoutPassword = users.map(({ password, ...user }) => user);
       res.json(usersWithoutPassword);
@@ -276,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const decoded = jwt.verify(token, JWT_SECRET) as any;
       const user = await storage.getUser(decoded.userId);
-      
+
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
@@ -320,7 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const decoded = jwt.verify(token, JWT_SECRET) as any;
       const { patientId } = req.query;
-      
+
       const targetPatientId = patientId as string || decoded.userId;
       const records = await storage.getHealthRecords(targetPatientId);
       res.json(records);
@@ -366,11 +374,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const decoded = jwt.verify(token, JWT_SECRET) as any;
-      
+
       // Advanced AI processing simulation with 97% accuracy
       const processingTime = Math.random() * 0.5; // 0-0.5 seconds for real-time processing
       const confidence = 97 + Math.random() * 2.5; // 97-99.5% accuracy range
-      
+
       const diagnosisData = {
         ...req.body,
         patientId: decoded.userId,
@@ -389,7 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const diagnosis = await storage.createAiDiagnosis(diagnosisData);
-      
+
       // Create real-time notification
       await storage.createNotification({
         userId: decoded.userId,
@@ -410,14 +418,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pharmacies", async (req, res) => {
     try {
       const { limit = 50, offset = 0, search } = req.query;
-      
+
       let pharmacies;
       if (search) {
         pharmacies = await storage.searchPharmacies(search as string);
       } else {
         pharmacies = await storage.getPharmacies(parseInt(limit as string), parseInt(offset as string));
       }
-      
+
       res.json(pharmacies);
     } catch (error) {
       console.error("Pharmacies fetch error:", error);
@@ -440,14 +448,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/medications", async (req, res) => {
     try {
       const { limit = 50, offset = 0, search } = req.query;
-      
+
       let medications;
       if (search) {
         medications = await storage.searchMedications(search as string);
       } else {
         medications = await storage.getMedications(parseInt(limit as string), parseInt(offset as string));
       }
-      
+
       res.json(medications);
     } catch (error) {
       console.error("Medications fetch error:", error);
@@ -488,7 +496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const order = await storage.createPharmacyOrder(orderData);
-      
+
       // Create order confirmation notification
       await storage.createNotification({
         userId: decoded.userId,
@@ -588,7 +596,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const token = req.headers.authorization?.replace("Bearer ", "");
       const decoded = token ? jwt.verify(token, JWT_SECRET) as any : null;
-      
+
       const eventData = {
         ...req.body,
         userId: decoded?.userId,
@@ -610,13 +618,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { language } = req.params;
       const translations = await storage.getTranslations(language);
-      
+
       // Convert to key-value pairs for frontend usage
       const translationMap = translations.reduce((acc, t) => {
         acc[t.key] = t.value;
         return acc;
       }, {} as Record<string, string>);
-      
+
       res.json(translationMap);
     } catch (error) {
       console.error("Translations fetch error:", error);

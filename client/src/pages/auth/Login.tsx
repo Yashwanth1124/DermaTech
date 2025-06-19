@@ -78,40 +78,14 @@ export default function Login() {
   const handleDemoLogin = async () => {
     setIsLoading(true);
     try {
-      await login({
-        email: "demo@dermatech.com",
-        password: "demo123"
-      });
-      toast({
-        title: "Demo Access Granted", 
-        description: "Exploring DermaTech features",
-      });
-      // Force page reload to trigger proper auth check
-      window.location.href = "/";
+      // Use the OAuth login endpoint
+      window.location.href = "/api/login";
     } catch (error) {
-      // If demo user doesn't exist, create it
-      try {
-        await register({
-          email: "demo@dermatech.com",
-          password: "demo123",
-          firstName: "Demo",
-          lastName: "Patient",
-          username: "demo_patient",
-          role: "patient"
-        });
-        toast({
-          title: "Demo Account Created",
-          description: "Welcome to DermaTech!",
-        });
-        // Don't redirect here - let the AuthWrapper handle it automatically
-      } catch (regError: any) {
-        toast({
-          title: "Demo Access Failed",
-          description: "Please try manual login",
-          variant: "destructive",
-        });
-      }
-    } finally {
+      toast({
+        title: "Demo Access Failed",
+        description: "Please try manual login",
+        variant: "destructive",
+      });
       setIsLoading(false);
     }
   };

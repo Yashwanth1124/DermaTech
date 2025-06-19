@@ -96,7 +96,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-4">
             <Button variant="ghost" size="sm" className="relative flex-shrink-0">
               <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-              <Badge className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 p-0 flex items-center justify-center text-xs">
+              <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs bg-red-500 text-white rounded-full border-2 border-white">
                 3
               </Badge>
             </Button>
@@ -121,12 +121,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => {}}>
+              <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg rounded-md p-1 min-w-[160px]">
+                <DropdownMenuItem onClick={() => {}} className="hover:bg-gray-50 cursor-pointer">
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuItem onClick={handleLogout} className="hover:bg-red-50 text-red-600 cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </DropdownMenuItem>
