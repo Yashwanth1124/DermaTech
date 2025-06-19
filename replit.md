@@ -124,6 +124,14 @@ DermaTech Care is a comprehensive dermatology platform that combines AI-powered 
 
 ## Changelog
 
+- June 19, 2025: Role-based dashboard customization implemented
+  - Patient Dashboard: Health score tracking, AI diagnoses, appointment management, medication reminders
+  - Doctor Dashboard: Patient queue management, AI review system, performance metrics, revenue tracking
+  - Admin Dashboard: System health monitoring, user analytics, department performance, blockchain security
+  - Each role features distinct widgets, color schemes, and tabbed navigation for organized workflows
+- June 19, 2025: OAuth authentication with Replit Auth successfully configured
+  - Seamless login/logout flow with automatic dashboard redirection based on user role
+  - Session management and token-based authentication working properly
 - June 19, 2025: Migration to Replit environment completed
   - Database connectivity established with Neon PostgreSQL
   - All routing and navigation configured

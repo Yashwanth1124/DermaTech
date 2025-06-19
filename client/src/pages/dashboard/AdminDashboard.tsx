@@ -1,288 +1,182 @@
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Users, 
-  Building, 
-  Activity, 
-  TrendingUp, 
-  Calendar, 
-  FileText,
-  Stethoscope,
-  Pill,
+  SystemHealthCard,
+  UserMetricsCard,
+  RevenueOverviewCard,
+  AIProcessingCard,
+  SystemAlertsCard,
+  DepartmentPerformanceCard,
+  RecentActivitiesCard,
+  BlockchainMetricsCard,
+  QuickActionsCard
+} from "@/components/dashboard/AdminWidgets";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { 
+  Settings,
   BarChart3,
-  Settings
-} from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+  Server,
+  Shield
+} from "lucide-react";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-
-  const { data: appointments = [], isLoading: appointmentsLoading } = useQuery({
-    queryKey: ['/api/appointments'],
+  
+  // Fetch admin-specific dashboard data
+  const { data: dashboardStats } = useQuery({
+    queryKey: ["/api/dashboard/stats"],
+    enabled: !!user,
   });
 
-  // Mock hospital statistics
-  const hospitalStats = {
-    totalPatients: 15420,
-    activeDoctors: 45,
-    todayAppointments: 234,
-    pendingApprovals: 12,
-    systemUptime: 99.98,
-    avgWaitTime: 12, // minutes
-    patientSatisfaction: 4.7, // out of 5
-    monthlyRevenue: 2845000, // in INR
+  const adminData = {
+    totalUsers: (dashboardStats as any)?.totalUsers || 15420,
+    activeUsers: (dashboardStats as any)?.activeUsers || 3240,
+    totalDoctors: (dashboardStats as any)?.totalDoctors || 420,
+    systemHealth: (dashboardStats as any)?.systemHealth || 98,
+    dailyRevenue: (dashboardStats as any)?.dailyRevenue || 125000,
+    aiProcessingLoad: (dashboardStats as any)?.aiProcessingLoad || 74,
+    criticalAlerts: (dashboardStats as any)?.criticalAlerts || [],
+    blockchainTransactions: (dashboardStats as any)?.blockchainTransactions || 2840,
+    departments: [
+      { name: 'Dermatology', utilization: 92, satisfaction: 4.8, staff: 15 },
+      { name: 'Telemedicine', utilization: 87, satisfaction: 4.6, staff: 8 },
+      { name: 'AI Diagnostics', utilization: 95, satisfaction: 4.9, staff: 5 },
+      { name: 'Pharmacy', utilization: 78, satisfaction: 4.5, staff: 12 }
+    ],
+    recentActivities: [
+      { type: 'doctor', message: 'Dr. Sarah Johnson joined the platform', time: '2 hours ago' },
+      { type: 'patient', message: '150 new patient registrations today', time: '4 hours ago' },
+      { type: 'system', message: 'AI model updated with 99.2% accuracy', time: '6 hours ago' },
+      { type: 'pharmacy', message: 'New pharmacy partner: MedPlus Healthcare', time: '1 day ago' }
+    ]
   };
 
-  const recentActivities = [
-    { id: 1, type: 'doctor', message: 'Dr. Sarah Johnson joined the platform', time: '2 hours ago' },
-    { id: 2, type: 'patient', message: '150 new patient registrations today', time: '4 hours ago' },
-    { id: 3, type: 'system', message: 'AI model updated with 99.2% accuracy', time: '6 hours ago' },
-    { id: 4, type: 'pharmacy', message: 'New pharmacy partner: MedPlus Healthcare', time: '1 day ago' },
-  ];
-
-  const departmentPerformance = [
-    { name: 'Dermatology', utilization: 92, satisfaction: 4.8 },
-    { name: 'Telemedicine', utilization: 87, satisfaction: 4.6 },
-    { name: 'AI Diagnostics', utilization: 95, satisfaction: 4.9 },
-    { name: 'Pharmacy', utilization: 78, satisfaction: 4.5 },
-  ];
-
   return (
-    <div className="space-y-6">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl p-6 text-white">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-2xl font-bold mb-2">
-              Hospital Administration Dashboard
-            </h2>
-            <p className="text-blue-100">
-              Manage your healthcare facility with advanced analytics and insights
-            </p>
+    <div className="space-y-8">
+      {/* Executive Header */}
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={(user as any)?.profileImageUrl} />
+              <AvatarFallback className="bg-purple-600 text-white text-lg">
+                {(user as any)?.firstName?.[0]}{(user as any)?.lastName?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p className="text-gray-600 mt-1">System Health: <span className="font-semibold text-green-600">{adminData.systemHealth}%</span> • {adminData.activeUsers} active users</p>
+              <div className="flex items-center gap-4 mt-2">
+                <div className="flex items-center gap-1">
+                  <Server className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-600">All systems operational</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Shield className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm text-blue-600">{adminData.blockchainTransactions} blockchain txns</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="mt-4 md:mt-0">
-            <Button variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50">
-              <Settings className="w-4 h-4 mr-2" />
-              System Settings
+          <div className="flex gap-3">
+            <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+              <Settings className="h-4 w-4 mr-2" />
+              System Console
+            </Button>
+            <Button variant="outline">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{hospitalStats.totalPatients.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              <TrendingUp className="inline w-3 h-3 mr-1 text-green-600" />
-              +12.3% from last month
-            </p>
-          </CardContent>
-        </Card>
+      {/* Main Dashboard Content */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="system">System</TabsTrigger>
+          <TabsTrigger value="departments">Departments</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Doctors</CardTitle>
-            <Stethoscope className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{hospitalStats.activeDoctors}</div>
-            <p className="text-xs text-muted-foreground">
-              <TrendingUp className="inline w-3 h-3 mr-1 text-green-600" />
-              +3 new this month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Appointments</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{hospitalStats.todayAppointments}</div>
-            <p className="text-xs text-muted-foreground">
-              Avg wait time: {hospitalStats.avgWaitTime} min
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Uptime</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{hospitalStats.systemUptime}%</div>
-            <p className="text-xs text-muted-foreground">
-              All systems operational
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Department Performance & Recent Activities */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Department Performance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Department Performance</CardTitle>
-            <CardDescription>Utilization and satisfaction metrics</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {departmentPerformance.map((dept) => (
-                <div key={dept.name} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-medium">{dept.name}</span>
-                    <span className="text-slate-600">{dept.utilization}% • ⭐ {dept.satisfaction}</span>
-                  </div>
-                  <Progress value={dept.utilization} className="h-2" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activities */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Recent Activities</CardTitle>
-            <CardDescription>Latest system events and updates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-4 p-3 rounded-lg bg-slate-50">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    {activity.type === 'doctor' && <Stethoscope className="w-4 h-4 text-blue-600" />}
-                    {activity.type === 'patient' && <Users className="w-4 h-4 text-green-600" />}
-                    {activity.type === 'system' && <Activity className="w-4 h-4 text-purple-600" />}
-                    {activity.type === 'pharmacy' && <Pill className="w-4 h-4 text-orange-600" />}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-800">{activity.message}</p>
-                    <p className="text-xs text-slate-500">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Financial Overview & System Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Financial Overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Financial Overview</CardTitle>
-            <CardDescription>Monthly revenue and billing statistics</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                <div>
-                  <p className="text-sm text-slate-600">Monthly Revenue</p>
-                  <p className="text-2xl font-bold text-green-700">
-                    ₹{(hospitalStats.monthlyRevenue / 100000).toFixed(1)}L
-                  </p>
-                </div>
-                <TrendingUp className="w-8 h-8 text-green-600" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-slate-50 rounded-lg">
-                  <p className="text-sm text-slate-600">Pending Bills</p>
-                  <p className="text-lg font-semibold">₹2.3L</p>
-                </div>
-                <div className="text-center p-3 bg-slate-50 rounded-lg">
-                  <p className="text-sm text-slate-600">Collection Rate</p>
-                  <p className="text-lg font-semibold">94.2%</p>
-                </div>
-              </div>
-            </div>
-            <Button variant="outline" className="w-full mt-4">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              View Financial Reports
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* System Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">System Status</CardTitle>
-            <CardDescription>Real-time system health monitoring</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-slate-800">EMR System</p>
-                  <p className="text-sm text-slate-600">All services operational</p>
-                </div>
-                <Badge className="bg-green-600">Online</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-slate-800">AI Diagnostics</p>
-                  <p className="text-sm text-slate-600">99.2% accuracy rate</p>
-                </div>
-                <Badge className="bg-green-600">Active</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-slate-800">Pharmacy Network</p>
-                  <p className="text-sm text-slate-600">2,000+ partners connected</p>
-                </div>
-                <Badge className="bg-blue-600">Connected</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-slate-800">Backup Systems</p>
-                  <p className="text-sm text-slate-600">Scheduled maintenance</p>
-                </div>
-                <Badge variant="secondary" className="bg-yellow-200 text-yellow-800">Maintenance</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Administrative Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button className="h-16 flex-col">
-              <Users className="w-6 h-6 mb-2" />
-              Manage Users
-            </Button>
-            <Button variant="outline" className="h-16 flex-col">
-              <Building className="w-6 h-6 mb-2" />
-              Hospital Settings
-            </Button>
-            <Button variant="outline" className="h-16 flex-col">
-              <FileText className="w-6 h-6 mb-2" />
-              Generate Reports
-            </Button>
-            <Button variant="outline" className="h-16 flex-col">
-              <Settings className="w-6 h-6 mb-2" />
-              System Config
-            </Button>
+        <TabsContent value="overview" className="space-y-6">
+          {/* Key Metrics Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <SystemHealthCard 
+              systemHealth={adminData.systemHealth} 
+              uptime={99.98} 
+            />
+            <UserMetricsCard 
+              totalUsers={adminData.totalUsers}
+              activeUsers={adminData.activeUsers}
+              growth={8}
+            />
+            <RevenueOverviewCard 
+              dailyRevenue={adminData.dailyRevenue}
+              monthlyGrowth={15}
+            />
+            <AIProcessingCard 
+              processingLoad={adminData.aiProcessingLoad}
+              efficiency={97}
+            />
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SystemAlertsCard alerts={adminData.criticalAlerts} />
+            <DepartmentPerformanceCard departments={adminData.departments} />
+            <RecentActivitiesCard activities={adminData.recentActivities} />
+            <BlockchainMetricsCard 
+              transactions={adminData.blockchainTransactions}
+              security={100}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <UserMetricsCard 
+              totalUsers={adminData.totalUsers}
+              activeUsers={adminData.activeUsers}
+              growth={8}
+            />
+            <RecentActivitiesCard activities={adminData.recentActivities} />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="system" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SystemHealthCard 
+              systemHealth={adminData.systemHealth} 
+              uptime={99.98} 
+            />
+            <AIProcessingCard 
+              processingLoad={adminData.aiProcessingLoad}
+              efficiency={97}
+            />
+            <SystemAlertsCard alerts={adminData.criticalAlerts} />
+            <QuickActionsCard />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="departments" className="space-y-6">
+          <DepartmentPerformanceCard departments={adminData.departments} />
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BlockchainMetricsCard 
+              transactions={adminData.blockchainTransactions}
+              security={100}
+            />
+            <SystemAlertsCard alerts={adminData.criticalAlerts} />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
