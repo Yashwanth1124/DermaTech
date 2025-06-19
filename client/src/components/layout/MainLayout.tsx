@@ -2,6 +2,12 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { 
   Menu, 
   X, 
@@ -109,11 +115,25 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </div>
             </div>
 
-            <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                  <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => {}}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="flex-shrink-0">
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="flex-shrink-0 sm:hidden" title="Logout">
               <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>

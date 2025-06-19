@@ -127,7 +127,7 @@ export default function Login() {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">DermaTech</h1>
-          <p className="text-gray-600">Advanced Healthcare Platform</p>
+          <p className="text-gray-700 font-medium">Advanced Healthcare Platform</p>
         </div>
 
         {/* Demo Access Alert */}
@@ -149,16 +149,16 @@ export default function Login() {
         <BiometricLoginButton />
 
         <Tabs defaultValue="login" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Sign In</TabsTrigger>
-            <TabsTrigger value="register">Sign Up</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+            <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:text-blue-600">Sign In</TabsTrigger>
+            <TabsTrigger value="register" className="data-[state=active]:bg-white data-[state=active]:text-green-600">Sign Up</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login">
             <Card>
               <CardHeader>
-                <CardTitle>Sign In</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-gray-900">Sign In</CardTitle>
+                <CardDescription className="text-gray-700">
                   Access your DermaTech healthcare dashboard
                 </CardDescription>
               </CardHeader>
@@ -186,7 +186,7 @@ export default function Login() {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={isLoading}>
                     {isLoading ? "Signing In..." : "Sign In"}
                   </Button>
                 </form>
@@ -197,8 +197,8 @@ export default function Login() {
           <TabsContent value="register">
             <Card>
               <CardHeader>
-                <CardTitle>Create Account</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-gray-900">Create Account</CardTitle>
+                <CardDescription className="text-gray-700">
                   Join DermaTech for advanced healthcare services
                 </CardDescription>
               </CardHeader>
@@ -277,7 +277,7 @@ export default function Login() {
                       </option>
                     </select>
                   </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white" disabled={isLoading}>
                     {isLoading ? "Creating Account..." : "Create Account"}
                   </Button>
                 </form>
