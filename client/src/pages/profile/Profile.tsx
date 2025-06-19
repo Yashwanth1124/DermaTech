@@ -28,7 +28,8 @@ import {
   Key,
   Globe,
   Moon,
-  Sun
+  Sun,
+  Download
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -275,7 +276,7 @@ export default function Profile() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
                 <Input
@@ -436,9 +437,9 @@ export default function Profile() {
                   onCheckedChange={(checked) => handlePreferenceChange('emailNotifications', checked)}
                 />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">SMS Notifications</p>
@@ -449,9 +450,9 @@ export default function Profile() {
                   onCheckedChange={(checked) => handlePreferenceChange('smsNotifications', checked)}
                 />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Appointment Reminders</p>
@@ -462,9 +463,9 @@ export default function Profile() {
                   onCheckedChange={(checked) => handlePreferenceChange('appointmentReminders', checked)}
                 />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Health Tips</p>
@@ -561,9 +562,9 @@ export default function Profile() {
                 </div>
                 <Switch defaultChecked />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Research Participation</p>
@@ -571,9 +572,9 @@ export default function Profile() {
                 </div>
                 <Switch />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Marketing Communications</p>
@@ -596,11 +597,11 @@ export default function Profile() {
                 <Download className="w-4 h-4 mr-2" />
                 Download My Data
               </Button>
-              
+
               <Button variant="destructive" className="w-full md:w-auto">
                 Delete Account
               </Button>
-              
+
               <p className="text-xs text-slate-500">
                 Account deletion is permanent and cannot be undone. All your data will be permanently removed.
               </p>

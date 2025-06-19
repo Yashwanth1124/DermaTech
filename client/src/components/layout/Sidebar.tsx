@@ -15,7 +15,8 @@ import {
   BarChart3, 
   HelpCircle, 
   LogOut,
-  Microscope
+  Microscope,
+  Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -134,7 +135,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           onClick={onClose}
         />
       )}
-      
+
       {/* Sidebar */}
       <aside className={cn(
         "fixed left-0 top-0 z-50 w-64 h-screen bg-white shadow-xl transform transition-transform duration-300 ease-in-out",
