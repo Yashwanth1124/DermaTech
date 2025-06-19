@@ -36,12 +36,11 @@ import {
   BarChart,
   HelpCircle
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+// OAuth login page - all login buttons redirect to /api/login
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Landing() {
-  const { login, register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, setLocation] = useLocation();
@@ -250,12 +249,12 @@ export default function Landing() {
                   <Button 
                     className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
                     onClick={() => {
-                      handleQuickLogin();
+                      window.location.href = "/api/login";
                       setMobileMenuOpen(false);
                     }}
                     disabled={isLoading}
                   >
-                    {isLoading ? "Loading..." : "Get Started"}
+                    Sign In with Replit
                   </Button>
                 </div>
               </div>
@@ -372,11 +371,11 @@ export default function Landing() {
                   <Button 
                     size="lg" 
                     className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 px-8 py-4 text-lg"
-                    onClick={handleQuickLogin}
+                    onClick={() => window.location.href = "/api/login"}
                     disabled={isLoading}
                   >
                     <Download className="mr-2 h-5 w-5" />
-                    {isLoading ? "Loading..." : "Get Started Free"}
+                    Sign In with Replit
                   </Button>
                   <Button 
                     variant="outline" 

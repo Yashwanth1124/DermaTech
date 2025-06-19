@@ -20,8 +20,12 @@ import { registerOtpRoutes } from "./otpRoutes";
 import { registerBiometricRoutes } from "./biometricRoutes";
 import { aiSymptomChecker } from "./aiDiagnostics";
 import { suggestOptimalAppointmentTimes, getDoctorProfiles, sendAppointmentReminders } from "./appointmentService";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup Replit Auth first
+  await setupAuth(app);
+  
   // Health check endpoint for Render - moved to /api/health to avoid conflicts with frontend
   app.get("/api/health", (req, res) => {
     res.json({ 
@@ -86,7 +90,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Auth routes for DermaTech
+  // Auth routes using Replit Auth
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Legacy auth routes for fallback (keeping for demo purposes)
   app.post("/api/auth/register", async (req, res) => {
     try {
       const { email, password, firstName, lastName, username, role = "patient" } = req.body;
@@ -148,7 +164,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/auth/user", async (req, res) => {
+  // Legacy user endpoint (keeping for fallback)
+  app.get("/api/auth/user-legacy", async (req, res) => {
     try {
       const token = req.headers.authorization?.replace("Bearer ", "");
       if (!token) {
@@ -174,15 +191,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard stats with comprehensive metrics
-  app.get("/api/dashboard/stats", async (req, res) => {
+  app.get("/api/dashboard/stats", isAuthenticated, async (req: any, res) => {
     try {
-      const token = req.headers.authorization?.replace("Bearer ", "");
-      if (!token) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const decoded = jwt.verify(token, JWT_SECRET) as any;
-      const user = await storage.getUser(decoded.userId);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
       
       if (!user) {
         return res.status(401).json({ message: "User not found" });

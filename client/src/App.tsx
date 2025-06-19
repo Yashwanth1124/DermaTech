@@ -59,7 +59,8 @@ function AuthWrapper() {
   }
 
   const getDashboardComponent = () => {
-    switch (user?.role) {
+    const userRole = (user as any)?.role;
+    switch (userRole) {
       case 'doctor':
         return DoctorDashboard;
       case 'admin':
