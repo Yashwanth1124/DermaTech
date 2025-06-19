@@ -39,7 +39,7 @@ export default function Login() {
         title: "Login Successful",
         description: "Welcome to DermaTech!",
       });
-      setLocation("/");
+      // AuthWrapper will handle automatic redirection
     } catch (error: any) {
       toast({
         title: "Login Failed",
@@ -61,7 +61,7 @@ export default function Login() {
         title: "Registration Successful",
         description: "Welcome to DermaTech!",
       });
-      setLocation("/");
+      // AuthWrapper will handle automatic redirection
     } catch (error: any) {
       toast({
         title: "Registration Failed",
@@ -81,10 +81,10 @@ export default function Login() {
         password: "demo123"
       });
       toast({
-        title: "Demo Access Granted",
+        title: "Demo Access Granted", 
         description: "Exploring DermaTech features",
       });
-      setLocation("/");
+      // AuthWrapper will handle automatic redirection
     } catch (error) {
       // If demo user doesn't exist, create it
       try {
@@ -100,7 +100,7 @@ export default function Login() {
           title: "Demo Account Created",
           description: "Welcome to DermaTech!",
         });
-        setLocation("/");
+        // Don't redirect here - let the AuthWrapper handle it automatically
       } catch (regError: any) {
         toast({
           title: "Demo Access Failed",

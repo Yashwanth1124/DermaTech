@@ -54,7 +54,7 @@ function AuthWrapper() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Landing />;
   }
 
