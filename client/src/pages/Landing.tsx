@@ -29,7 +29,7 @@ import {
   MapPin,
   MessageCircle,
   BellRing,
-  MicIcon,
+  Mic,
   Settings,
   Code,
   Lock,
@@ -271,7 +271,7 @@ export default function Landing() {
               <div className="p-4 border-t flex gap-2">
                 <input type="text" className="flex-1 p-2 border rounded-md" placeholder="Type your message..." />
                 <Button size="sm">Send</Button>
-                <Button variant="outline" size="sm"><MicIcon className="h-4 w-4" /></Button>
+                <Button variant="outline" size="sm"><Mic className="h-4 w-4" /></Button>
               </div>
             </motion.div>
           )}
@@ -337,7 +337,7 @@ export default function Landing() {
                       className="text-gray-600 flex items-center"
                       onClick={handleVoiceCapture}
                     >
-                      <MicIcon className="h-4 w-4 mr-1" />
+                      <Mic className="h-4 w-4 mr-1" />
                       <span className="text-xs">Or describe your symptoms</span>
                     </Button>
                   </div>
@@ -670,7 +670,7 @@ export default function Landing() {
                 <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer h-full">
                   <CardHeader>
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                      <MicIcon className="h-6 w-6 text-blue-600" />
+                      <Mic className="h-6 w-6 text-blue-600" />
                     </div>
                     <CardTitle className="text-xl">Voice-enabled EMR</CardTitle>
                     <CardDescription>
@@ -876,7 +876,7 @@ export default function Landing() {
                 <div className="absolute top-4 right-4">
                   <Badge className="bg-white text-green-600">
                     <span className="flex items-center">
-                      <MicIcon className="h-3 w-3 mr-1" />
+                      <Mic className="h-3 w-3 mr-1" />
                       Audio Available
                     </span>
                   </Badge>
