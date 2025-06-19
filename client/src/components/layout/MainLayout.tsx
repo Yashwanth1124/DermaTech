@@ -60,7 +60,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Top Navigation Bar */}
-      <nav className="bg-white border-b border-gray-200 px-3 sm:px-4 py-3 fixed top-0 left-0 right-0 z-50">
+      <nav className="bg-white shadow-sm px-3 sm:px-4 py-3 fixed top-0 left-0 right-0 z-50">
         <div className="flex items-center justify-between max-w-full">
           {/* Left side - Logo and hamburger menu */}
           <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
@@ -143,8 +143,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <div className="flex flex-1 pt-16 overflow-hidden">
         {/* Sidebar */}
         <aside className={`
-          fixed inset-y-0 left-0 z-40 w-64 sm:w-72 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out
-          lg:translate-x-0 lg:relative lg:z-auto
+          fixed inset-y-0 left-0 z-40 w-64 sm:w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
+          lg:translate-x-0 lg:relative lg:z-auto lg:shadow-none lg:border-r lg:border-gray-200
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
           <div className="flex flex-col h-full pt-16 lg:pt-0">
@@ -161,8 +161,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     className={`
                       flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2.5 sm:py-3 rounded-lg text-sm font-medium transition-all duration-200
                       ${isActive 
-                        ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700 shadow-sm' 
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm'
+                        ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 shadow-md border border-blue-200' 
+                        : 'text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-md hover:border hover:border-gray-200'
                       }
                     `}
                     onClick={() => setIsSidebarOpen(false)}
@@ -181,8 +181,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
             </nav>
 
             {/* Bottom section */}
-            <div className="p-3 sm:p-4 border-t border-gray-200 flex-shrink-0">
-              <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-3 sm:p-4">
+            <div className="p-3 sm:p-4 flex-shrink-0">
+              <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-3 sm:p-4 shadow-sm border border-blue-100">
                 <div className="flex items-center space-x-2 mb-1 sm:mb-2">
                   <Brain className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 flex-shrink-0" />
                   <span className="text-xs sm:text-sm font-medium text-gray-900">AI Powered</span>

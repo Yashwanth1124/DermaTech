@@ -88,6 +88,15 @@
   *:focus-visible {
     @apply outline-2 outline-offset-2 outline-blue-500;
   }
+
+  /* Enhanced card styling */
+  .enhanced-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200;
+  }
+
+  .enhanced-card-content {
+    @apply p-4 sm:p-6;
+  }
 }
 
 /* Video controls styles */

@@ -16,10 +16,11 @@ import {
   Calendar,
   TrendingUp
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function PatientDashboard() {
   const { user } = useAuth();
-  
+
   // Fetch patient-specific dashboard data
   const { data: dashboardStats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -38,36 +39,38 @@ export default function PatientDashboard() {
   return (
     <div className="space-y-8">
       {/* Personalized Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={(user as any)?.profileImageUrl} />
-              <AvatarFallback className="bg-blue-600 text-white text-lg">
-                {(user as any)?.firstName?.[0]}{(user as any)?.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Welcome back, {(user as any)?.firstName}!</h1>
-              <p className="text-gray-600 mt-1">Your skin health score: <span className="font-semibold text-green-600">{patientData.healthScore}/100</span></p>
-              <div className="flex items-center gap-2 mt-2">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-600 capitalize">{patientData.skinHealthTrend}</span>
+      <Card className="mb-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={(user as any)?.profileImageUrl} />
+                <AvatarFallback className="bg-blue-600 text-white text-lg">
+                  {(user as any)?.firstName?.[0]}{(user as any)?.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Welcome back, {(user as any)?.firstName}!</h1>
+                <p className="text-gray-600 mt-1">Your skin health score: <span className="font-semibold text-green-600">{patientData.healthScore}/100</span></p>
+                <div className="flex items-center gap-2 mt-2">
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-600 capitalize">{patientData.skinHealthTrend}</span>
+                </div>
               </div>
             </div>
+            <div className="flex gap-3">
+              <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600">
+                <Camera className="h-4 w-4 mr-2" />
+                AI Skin Analysis
+              </Button>
+              <Button variant="outline">
+                <Calendar className="h-4 w-4 mr-2" />
+                Book Appointment
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600">
-              <Camera className="h-4 w-4 mr-2" />
-              AI Skin Analysis
-            </Button>
-            <Button variant="outline">
-              <Calendar className="h-4 w-4 mr-2" />
-              Book Appointment
-            </Button>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Main Dashboard Content */}
       <Tabs defaultValue="overview" className="space-y-6">

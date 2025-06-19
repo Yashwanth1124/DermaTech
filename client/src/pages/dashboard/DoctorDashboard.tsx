@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   TodaysScheduleCard,
   AIReviewQueueCard,
@@ -21,7 +22,7 @@ import {
 
 export default function DoctorDashboard() {
   const { user } = useAuth();
-  
+
   // Fetch doctor-specific dashboard data
   const { data: dashboardStats } = useQuery({
     queryKey: ["/api/dashboard/stats"],

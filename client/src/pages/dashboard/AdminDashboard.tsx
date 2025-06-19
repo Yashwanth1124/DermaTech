@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   SystemHealthCard,
   UserMetricsCard,
@@ -23,7 +24,7 @@ import {
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  
+
   // Fetch admin-specific dashboard data
   const { data: dashboardStats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -56,42 +57,44 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       {/* Executive Header */}
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={(user as any)?.profileImageUrl} />
-              <AvatarFallback className="bg-purple-600 text-white text-lg">
-                {(user as any)?.firstName?.[0]}{(user as any)?.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600 mt-1">System Health: <span className="font-semibold text-green-600">{adminData.systemHealth}%</span> • {adminData.activeUsers} active users</p>
-              <div className="flex items-center gap-4 mt-2">
-                <div className="flex items-center gap-1">
-                  <Server className="h-4 w-4 text-green-600" />
-                  <span className="text-sm text-green-600">All systems operational</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Shield className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm text-blue-600">{adminData.blockchainTransactions} blockchain txns</span>
+      <Card className="mb-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4 mb-4 sm:mb-0">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={(user as any)?.profileImageUrl} />
+                <AvatarFallback className="bg-purple-600 text-white text-lg">
+                  {(user as any)?.firstName?.[0]}{(user as any)?.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+                <p className="text-gray-600 mt-1">System Health: <span className="font-semibold text-green-600">{adminData.systemHealth}%</span> • {adminData.activeUsers} active users</p>
+                <div className="flex items-center gap-4 mt-2">
+                  <div className="flex items-center gap-1">
+                    <Server className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-600">All systems operational</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Shield className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-600">{adminData.blockchainTransactions} blockchain txns</span>
+                  </div>
                 </div>
               </div>
             </div>
+            <div className="flex gap-3">
+              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                <Settings className="h-4 w-4 mr-2" />
+                System Console
+              </Button>
+              <Button variant="outline">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Analytics
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-              <Settings className="h-4 w-4 mr-2" />
-              System Console
-            </Button>
-            <Button variant="outline">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
-            </Button>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Main Dashboard Content */}
       <Tabs defaultValue="overview" className="space-y-6">
