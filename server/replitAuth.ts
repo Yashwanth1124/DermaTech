@@ -8,7 +8,7 @@ export async function setupAuth(app: Express) {
   
   // Simple session middleware
   app.use(session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || 'dermatech-fallback-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
