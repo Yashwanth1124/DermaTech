@@ -4,8 +4,8 @@ services:
     runtime: node
     plan: free
     region: oregon  # or singapore, frankfurt, ohio
-    buildCommand: npm ci && npm run build
-    startCommand: npm start
+    buildCommand: npm install && npm run build
+    startCommand: npm run dev
     healthCheckPath: /health
     autoDeploy: true  # Auto-deploy on git push
     envVars:
