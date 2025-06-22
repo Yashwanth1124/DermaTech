@@ -47,10 +47,10 @@ export default function AIDiagnostics() {
   const analysisMutation = useMutation({
     mutationFn: async (imageData: any) => {
       setIsProcessing(true);
-      
+
       // Simulate advanced AI processing with realistic timing
       await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
-      
+
       const result = await apiRequest("/api/ai-diagnoses", {
         method: "POST",
         body: JSON.stringify({
@@ -62,7 +62,7 @@ export default function AIDiagnostics() {
           skinCondition: imageData.skinCondition
         }),
       });
-      
+
       setIsProcessing(false);
       return result;
     },
@@ -161,9 +161,9 @@ export default function AIDiagnostics() {
     ];
 
     const randomCondition = conditions[Math.floor(Math.random() * conditions.length)];
-    
+
     const imageUrl = URL.createObjectURL(selectedImage);
-    
+
     await analysisMutation.mutateAsync({
       url: imageUrl,
       ...randomCondition
@@ -269,42 +269,43 @@ export default function AIDiagnostics() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                    <div className="space-y-4">
-                      <div className="flex justify-center">
-                        <Camera className="h-16 w-16 text-gray-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          Select Image for Analysis
-                        </h3>
-                        <p className="text-gray-600 text-sm">
-                          Capture a photo or upload from your device
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <div className="upload-area p-8 text-center group cursor-pointer" 
+                   onClick={() => document.getElementById('file-upload')?.click()}>
+                <div className="bg-white/80 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                  <Camera className="h-8 w-8 text-gray-500 group-hover:text-blue-600 transition-colors" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Select Image for Analysis</h3>
+                <p className="text-gray-600 mb-6">Capture a photo or upload from your device</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCameraCapture();
+                    }}
+                    disabled={isProcessing}
+                    className="bg-blue-600 hover:bg-blue-700 border-0 shadow-md hover:shadow-lg transition-all duration-300"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    Capture Photo
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUploadClick();
+                    }}
+                    disabled={isProcessing}
+                    className="border-0 ring-1 ring-gray-200 hover:ring-blue-300 hover:bg-blue-50 shadow-sm hover:shadow-md transition-all duration-300"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Image
+                  </Button>
+                </div>
+              </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    onClick={handleCameraCapture}
-                    variant="outline"
-                    className="h-12"
-                    disabled={isProcessing}
-                  >
-                    <Camera className="mr-2 h-5 w-5" />
-                    Capture Photo
-                  </Button>
-                  <Button
-                    onClick={handleUploadClick}
-                    variant="outline"
-                    className="h-12"
-                    disabled={isProcessing}
-                  >
-                    <Upload className="mr-2 h-5 w-5" />
-                    Upload Image
-                  </Button>
+                  
                 </div>
 
                 {selectedImage && !isProcessing && !analysisResult && (
@@ -586,7 +587,7 @@ export default function AIDiagnostics() {
                       AI diagnostics are for informational purposes. Always consult healthcare professionals for treatment.
                     </AlertDescription>
                   </Alert>
-                  
+
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
                       <Shield className="h-5 w-5 text-green-600" />

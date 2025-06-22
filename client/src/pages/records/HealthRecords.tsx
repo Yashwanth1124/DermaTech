@@ -228,7 +228,7 @@ export default function HealthRecords() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="modern-card">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -238,16 +238,16 @@ export default function HealthRecords() {
                   placeholder="Search records..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 soft-input"
                 />
               </div>
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48 soft-input">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="border-0 ring-1 ring-gray-200 shadow-lg">
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="prescription">Prescriptions</SelectItem>
                 <SelectItem value="report">Reports</SelectItem>
@@ -291,11 +291,11 @@ export default function HealthRecords() {
         ) : (
           <div className="grid gap-4">
             {filteredRecords.map((record: any) => (
-              <Card key={record.id} className="hover:shadow-md transition-shadow">
+              <Card key={record.id} className="modern-card">
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center shadow-sm">
                         {getRecordIcon(record.recordType)}
                       </div>
                       <div className="flex-1">
@@ -339,44 +339,44 @@ export default function HealthRecords() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="modern-card text-center">
           <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-4 mb-3">
+              <div className="text-3xl font-bold">
                 {filteredRecords.filter((r: any) => r.recordType === 'prescription').length}
               </div>
-              <p className="text-sm text-slate-600">Prescriptions</p>
             </div>
+            <p className="text-sm font-medium text-slate-700">Prescriptions</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="modern-card text-center">
           <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
+            <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl p-4 mb-3">
+              <div className="text-3xl font-bold">
                 {filteredRecords.filter((r: any) => r.recordType === 'image').length}
               </div>
-              <p className="text-sm text-slate-600">Medical Images</p>
             </div>
+            <p className="text-sm font-medium text-slate-700">Medical Images</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="modern-card text-center">
           <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+            <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl p-4 mb-3">
+              <div className="text-3xl font-bold">
                 {filteredRecords.filter((r: any) => r.recordType === 'ai_diagnosis').length}
               </div>
-              <p className="text-sm text-slate-600">AI Diagnoses</p>
             </div>
+            <p className="text-sm font-medium text-slate-700">AI Diagnoses</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="modern-card text-center">
           <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-slate-600">
+            <div className="bg-gradient-to-br from-slate-500 to-slate-600 text-white rounded-2xl p-4 mb-3">
+              <div className="text-3xl font-bold">
                 {filteredRecords.filter((r: any) => r.recordType === 'report').length}
               </div>
-              <p className="text-sm text-slate-600">Reports</p>
             </div>
+            <p className="text-sm font-medium text-slate-700">Reports</p>
           </CardContent>
         </Card>
       </div>
